@@ -1,0 +1,52 @@
+name: Déploiement GitHub Pages
+
+on:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+permissions:
+    contents: read
+    pages: write
+    id-token: write
+
+concurrency:
+    group: pages
+    cancel-in-progress: true
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: actions/setup-node@v7
+              with:
+                  node-version: 24
+                  cache: npm
+
+            - uses: castor-php/setup-castor@v1
+
+            # Le modèle d'embeddings (~135 Mo) n'est téléchargé qu'une fois, puis gardé en cache.
+            - uses: actions/cache@v6
+              with:
+                  path: .cache/models
+                  key: models-${{ hashFiles('site/config.js') }}
+
+            - run: castor build
+
+            - uses: actions/configure-pages@v6
+
+            - uses: actions/upload-pages-artifact@v5
+              with:
+                  path: site
+
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - id: deployment
+              uses: actions/deploy-pages@v5

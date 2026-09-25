@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>De gauche ou de droite ?</title>
+<meta name="description" content="Une IA qui tourne dans votre navigateur vous dit si c'est de gauche ou de droite.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 20 10%22%3E%3Cpath d=%22M0 10a10 10 0 0 1 10-10v10z%22 fill=%22%23d7263d%22/%3E%3Cpath d=%22M10 0a10 10 0 0 1 10 10H10z%22 fill=%22%232748c9%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Public+Sans:wght@400;500;700&display=swap">
+<style>
+:root {
+    --bg: #f2f3f7;
+    --surface: #ffffff;
+    --ink: #161820;
+    --muted: #5d6272;
+    --line: #d9dce5;
+    --gauche: #d7263d;
+    --droite: #2748c9;
+    --focus: #161820;
+    --display: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif;
+    --body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #12131a;
+        --surface: #1c1e27;
+        --ink: #eceef4;
+        --muted: #9a9fb0;
+        --line: #2f3240;
+        --gauche: #ff5a6a;
+        --droite: #6d8bff;
+        --focus: #eceef4;
+        color-scheme: dark;
+    }
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 1rem/1.55 var(--body);
+    padding-inline: 16px;
+    padding-block: 40px 24px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+main {
+    width: 100%;
+    max-width: 34rem;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    flex: 1;
+}
+
+h1 {
+    font: 900 clamp(2.6rem, 11vw, 4.2rem)/0.92 var(--display);
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    margin: 0;
+    text-wrap: balance;
+}
+h1 .g { color: var(--gauche); }
+h1 .d { color: var(--droite); }
+.lede { margin: 10px 0 0; color: var(--muted); max-width: 32rem; }
+
+form { display: flex; gap: 8px; }
+input {
+    flex: 1;
+    min-width: 0;
+    font: 500 1.1rem var(--body);
+    color: var(--ink);
+    background: var(--surface);
+    border: 2px solid var(--line);
+    border-radius: 6px;
+    padding: 12px 14px;
+}
+input:focus { outline: none; border-color: var(--focus); }
+button {
+    font: 700 1.05rem var(--display);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--ink);
+    border: 0;
+    border-radius: 6px;
+    padding: 0 22px;
+    cursor: pointer;
+}
+button:disabled { opacity: 0.4; cursor: wait; }
+button:focus-visible, .chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: -16px; }
+.chip {
+    font: 500 0.85rem var(--body);
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px 11px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+.chip:hover { color: var(--ink); border-color: var(--muted); }
+
+.verdict {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 20px 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+}
+.hemicycle { width: 100%; max-width: 320px; height: auto; display: block; }
+.hemicycle .seat-g { fill: var(--gauche); }
+.hemicycle .seat-d { fill: var(--droite); }
+.hemicycle .seat { opacity: 0.18; transition: opacity 0.4s; }
+.hemicycle .seat.on { opacity: 1; }
+.hemicycle .needle { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.hemicycle .hub { fill: var(--ink); }
+.hemicycle text { fill: var(--muted); font: 700 9px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
+#needle { transform-origin: 100px 100px; transition: transform 0.7s cubic-bezier(.3, 1.4, .5, 1); }
+
+.subject { margin: 4px 0 0; color: var(--muted); font-size: 0.95rem; overflow-wrap: anywhere; }
+.answer {
+    margin: 0;
+    font: 900 clamp(2rem, 9vw, 2.8rem)/1 var(--display);
+    text-transform: uppercase;
+    text-wrap: balance;
+}
+.answer.gauche { color: var(--gauche); }
+.answer.droite { color: var(--droite); }
+.score { margin: 0; color: var(--muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+
+.status { margin: 0; color: var(--muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; min-height: 1.4em; }
+progress { width: 100%; height: 6px; accent-color: var(--ink); }
+
+footer {
+    max-width: 34rem;
+    width: 100%;
+    margin: 40px auto 0;
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+footer a { color: inherit; }
+
+@media (prefers-reduced-motion: reduce) {
+    #needle, .hemicycle .seat { transition: none; }
+}
+</style>
+</head>
+<body>
+<main>
+    <header>
+        <h1>De <span class="g">gauche</span> ou de <span class="d">droite</span>&nbsp;?</h1>
+        <p class="lede">Tapez n'importe quoi, l'IA tranche. Le modèle tourne entièrement dans votre navigateur&nbsp;: rien n'est envoyé à un serveur.</p>
+    </header>
+
+    <form id="form" autocomplete="off">
+        <label for="q" hidden>Sujet</label>
+        <input id="q" name="q" placeholder="la raclette, le télétravail…" maxlength="200" required>
+        <button id="go" type="submit" disabled>Go</button>
+    </form>
+
+    <div class="chips" id="chips"></div>
+
+    <section class="verdict" aria-live="polite">
+        <svg class="hemicycle" viewBox="0 0 200 116" role="img" aria-label="Jauge gauche-droite">
+            <g id="seats"></g>
+            <line id="needle" class="needle" x1="100" y1="100" x2="100" y2="34"></line>
+            <circle class="hub" cx="100" cy="100" r="6"></circle>
+            <text x="8" y="114">Gauche</text>
+            <text x="192" y="114" text-anchor="end">Droite</text>
+        </svg>
+        <p class="subject" id="subject">Chargement du modèle…</p>
+        <p class="answer" id="answer">…</p>
+        <p class="score" id="score"></p>
+    </section>
+
+    <div>
+        <p class="status" id="status">Premier chargement&nbsp;: environ 120&nbsp;Mo, gardés en cache ensuite.</p>
+        <progress id="progress" max="100" value="0"></progress>
+    </div>
+</main>
+<footer>
+    Réponses générées par une IA entraînée sur des clichés. À ne pas prendre au sérieux.
+    Inspiré de <a href="https://degaucheoudedroite.delemazure.fr/">degaucheoudedroite.delemazure.fr</a>.
+</footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>

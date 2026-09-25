@@ -1,0 +1,15 @@
+{
+  "name": "gauche-ou-droite",
+  "version": "1.0.0",
+  "description": "De gauche ou de droite ? Un classifieur qui tourne dans le navigateur",
+  "scripts": {
+    "train": "node scripts/train.mjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@huggingface/transformers": "^4.3.0"
+  },
+  "private": "true"
+}
