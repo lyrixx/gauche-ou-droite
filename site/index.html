@@ -82,6 +82,7 @@ input {
     padding: 12px 14px;
 }
 input:focus { outline: none; border-color: var(--focus); }
+input:disabled { opacity: 0.5; }
 button {
     font: 700 1.05rem var(--display);
     letter-spacing: 0.06em;
@@ -107,7 +108,8 @@ button:focus-visible, .chip:focus-visible { outline: 2px solid var(--focus); out
     text-transform: none;
     letter-spacing: 0;
 }
-.chip:hover { color: var(--ink); border-color: var(--muted); }
+.chip:hover:not(:disabled) { color: var(--ink); border-color: var(--muted); }
+.chip:disabled { opacity: 0.5; cursor: wait; }
 
 .verdict {
     background: var(--surface);
@@ -129,6 +131,13 @@ button:focus-visible, .chip:focus-visible { outline: 2px solid var(--focus); out
 .hemicycle .hub { fill: var(--ink); }
 .hemicycle text { fill: var(--muted); font: 700 9px var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
 #needle { transform-origin: 100px 100px; transition: transform 0.7s cubic-bezier(.3, 1.4, .5, 1); }
+/* Pendant un chargement ou un calcul, l'aiguille hésite entre la gauche et la droite. */
+.verdict.busy #needle { animation: hesite 1.4s ease-in-out infinite alternate; }
+.verdict.busy .answer { color: var(--muted); }
+@keyframes hesite {
+    from { transform: rotate(-55deg); }
+    to { transform: rotate(55deg); }
+}
 
 .subject { margin: 4px 0 0; color: var(--muted); font-size: 0.95rem; overflow-wrap: anywhere; }
 .answer {
@@ -142,7 +151,7 @@ button:focus-visible, .chip:focus-visible { outline: 2px solid var(--focus); out
 .score { margin: 0; color: var(--muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
 
 .status { margin: 0; color: var(--muted); font-size: 0.9rem; font-variant-numeric: tabular-nums; min-height: 1.4em; }
-progress { width: 100%; height: 6px; accent-color: var(--ink); }
+progress { width: 100%; max-width: 260px; height: 6px; margin-top: 4px; accent-color: var(--ink); }
 
 footer {
     max-width: 34rem;
@@ -155,6 +164,7 @@ footer a { color: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
     #needle, .hemicycle .seat { transition: none; }
+    .verdict.busy #needle { animation: none; }
 }
 </style>
 </head>
@@ -167,13 +177,13 @@ footer a { color: inherit; }
 
     <form id="form" autocomplete="off">
         <label for="q" hidden>Sujet</label>
-        <input id="q" name="q" placeholder="la raclette, le télétravail…" maxlength="200" required>
+        <input id="q" name="q" placeholder="la raclette, le télétravail…" maxlength="200" required disabled>
         <button id="go" type="submit" disabled>Go</button>
     </form>
 
     <div class="chips" id="chips"></div>
 
-    <section class="verdict" aria-live="polite">
+    <section class="verdict busy" id="verdict" aria-live="polite" aria-busy="true">
         <svg class="hemicycle" viewBox="0 0 200 116" role="img" aria-label="Jauge gauche-droite">
             <g id="seats"></g>
             <line id="needle" class="needle" x1="100" y1="100" x2="100" y2="34"></line>
@@ -182,14 +192,12 @@ footer a { color: inherit; }
             <text x="192" y="114" text-anchor="end">Droite</text>
         </svg>
         <p class="subject" id="subject">Chargement du modèle…</p>
-        <p class="answer" id="answer">…</p>
-        <p class="score" id="score"></p>
+        <p class="answer" id="answer">0&nbsp;%</p>
+        <progress id="progress" max="100" value="0"></progress>
+        <p class="score" id="score">Premier chargement&nbsp;: environ 200&nbsp;Mo, gardés en cache ensuite.</p>
     </section>
 
-    <div>
-        <p class="status" id="status">Premier chargement&nbsp;: environ 120&nbsp;Mo, gardés en cache ensuite.</p>
-        <progress id="progress" max="100" value="0"></progress>
-    </div>
+    <p class="status" id="status"></p>
 </main>
 <footer>
     Réponses générées par une IA entraînée sur des clichés. À ne pas prendre au sérieux.

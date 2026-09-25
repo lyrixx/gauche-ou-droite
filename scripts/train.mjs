@@ -8,12 +8,12 @@
 //    dans un JSON que le site charge.
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { env, pipeline } from '@huggingface/transformers';
-import { EMBEDDING_MODEL, PREFIX, DTYPE } from '../site/config.js';
-import { normalize } from '../site/classifier.js';
+import * as transformers from '@huggingface/transformers';
+import { EMBEDDING_MODEL } from '../site/config.js';
+import { createEmbedder, normalize } from '../site/classifier.js';
 
 // Garde le modèle téléchargé en local (et dans le cache de la CI) pour ne pas le retélécharger.
-env.cacheDir = new URL('../.cache/models/', import.meta.url).pathname;
+transformers.env.cacheDir = new URL('../.cache/models/', import.meta.url).pathname;
 
 const LAMBDA = 0.01; // régularisation L2 : évite de "coller" aux exemples
 const EPOCHS = 2000;
@@ -33,16 +33,22 @@ const examples = readFileSync(new URL('../data/exemples.csv', import.meta.url), 
 console.log(`${examples.length} exemples (${examples.filter((e) => e.y === 0).length} gauche, ${examples.filter((e) => e.y === 1).length} droite)`);
 
 console.log(`Chargement de ${EMBEDDING_MODEL}...`);
-const extractor = await pipeline('feature-extraction', EMBEDDING_MODEL, { dtype: DTYPE });
+const embed = await createEmbedder(transformers);
 
 console.log('Calcul des embeddings...');
-const output = await extractor(examples.map((e) => PREFIX + e.text), { pooling: 'mean', normalize: true });
-const X = output.tolist();
+const X = [];
+for (let i = 0; i < examples.length; i += 32) {
+    X.push(...(await embed(examples.slice(i, i + 32).map((e) => e.text))));
+}
 const Y = examples.map((e) => e.y);
 const dim = X[0].length;
 
 const sigmoid = (z) => 1 / (1 + Math.exp(-z));
-const dot = (a, b) => a.reduce((s, v, i) => s + v * b[i], 0);
+const dot = (a, b) => {
+    let s = 0;
+    for (let i = 0; i < a.length; i++) s += a[i] * b[i];
+    return s;
+};
 
 function standardize(rows) {
     const mean = new Array(dim).fill(0);
@@ -55,20 +61,22 @@ function standardize(rows) {
 function train(rows, labels) {
     const { mean, std } = standardize(rows);
     const Z = rows.map((r) => r.map((v, i) => (v - mean[i]) / std[i]));
-    const w = new Array(dim).fill(0);
+    const w = new Float64Array(dim);
+    const gw = new Float64Array(dim);
     let b = 0;
     for (let epoch = 0; epoch < EPOCHS; epoch++) {
-        const gw = w.map((wi) => LAMBDA * wi);
+        for (let i = 0; i < dim; i++) gw[i] = LAMBDA * w[i];
         let gb = 0;
-        Z.forEach((z, n) => {
-            const err = sigmoid(dot(w, z) + b) - labels[n];
-            for (let i = 0; i < dim; i++) gw[i] += (err * z[i]) / Z.length;
-            gb += err / Z.length;
-        });
+        for (let n = 0; n < Z.length; n++) {
+            const z = Z[n];
+            const err = (sigmoid(dot(w, z) + b) - labels[n]) / Z.length;
+            for (let i = 0; i < dim; i++) gw[i] += err * z[i];
+            gb += err;
+        }
         for (let i = 0; i < dim; i++) w[i] -= LEARNING_RATE * gw[i];
         b -= LEARNING_RATE * gb;
     }
-    return { mean, std, weights: w, bias: b };
+    return { mean, std, weights: Array.from(w), bias: b };
 }
 
 function predict(model, row) {
@@ -100,7 +108,6 @@ writeFileSync(
     new URL('../site/classifier.json', import.meta.url),
     JSON.stringify({
         embeddingModel: EMBEDDING_MODEL,
-        prefix: PREFIX,
         mean: round(model.mean),
         std: round(model.std),
         weights: round(model.weights),

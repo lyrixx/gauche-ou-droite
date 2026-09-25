@@ -1,6 +1,8 @@
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0/+esm';
-import { EMBEDDING_MODEL, DTYPE } from './config.js';
-import { classify } from './classifier.js';
+import * as transformers from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.0/+esm';
+import { classify, createEmbedder } from './classifier.js';
+
+// Fait tourner le modèle dans un Web Worker : la page reste fluide pendant les calculs.
+transformers.env.backends.onnx.wasm.proxy = true;
 
 const EXAMPLES = ['la raclette', 'le télétravail', 'la trottinette électrique', 'le rugby', 'les chats', 'le camping-car', 'le yoga', 'la chasse au trésor'];
 
@@ -8,6 +10,21 @@ const $ = (id) => document.getElementById(id);
 const form = $('form');
 const input = $('q');
 const go = $('go');
+let ready = false;
+
+// Tant que le modèle se télécharge, le formulaire est verrouillé. Sans ça, envoyer le
+// formulaire recharge la page (envoi HTML classique) et relance le téléchargement à zéro.
+function setBusy(value) {
+    $('verdict').classList.toggle('busy', value);
+    $('verdict').setAttribute('aria-busy', String(value));
+}
+
+function setReady(value) {
+    ready = value;
+    input.disabled = !value;
+    go.disabled = !value;
+    for (const chip of $('chips').children) chip.disabled = !value;
+}
 
 // Hémicycle : 5 rangées de sièges en demi-cercle, gauche en rouge, droite en bleu.
 const seats = [];
@@ -50,6 +67,7 @@ for (const ex of EXAMPLES) {
     b.type = 'button';
     b.className = 'chip';
     b.textContent = ex;
+    b.disabled = true;
     b.addEventListener('click', () => {
         input.value = ex;
         form.requestSubmit();
@@ -57,42 +75,73 @@ for (const ex of EXAMPLES) {
     $('chips').append(b);
 }
 
-const [classifier, extractor] = await Promise.all([
-    fetch('classifier.json').then((r) => r.json()),
-    pipeline('feature-extraction', EMBEDDING_MODEL, {
-        dtype: DTYPE,
-        progress_callback: (e) => {
-            if (e.status === 'progress_total') {
-                $('progress').value = e.progress;
-                $('status').textContent = `Téléchargement du modèle : ${(e.loaded / 1e6).toFixed(0)} / ${(e.total / 1e6).toFixed(0)} Mo`;
-            }
-        },
-    }),
-]);
-
-$('progress').hidden = true;
-$('status').textContent = 'Modèle prêt. Il tourne dans votre navigateur.';
-$('subject').textContent = 'À vous de jouer.';
-$('answer').textContent = '?';
-go.disabled = false;
-input.focus();
+let classifier, embed;
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const text = input.value.trim();
-    if (!text) return;
-    go.disabled = true;
+    if (!ready || !text) return;
+    setReady(false);
+    setBusy(true);
+    $('subject').textContent = `« ${text} »`;
+    $('answer').textContent = 'Réflexion…';
+    $('answer').className = 'answer';
+    $('score').textContent = '';
+    for (const s of seats) s.el.classList.remove('on');
     const start = performance.now();
-    const { pDroite: p, source } = await classify(classifier, extractor, text);
+    const { pDroite: p, source } = await classify(classifier, embed, text);
     const ms = performance.now() - start;
     const v = verdict(p);
+    setBusy(false);
     showScore(p);
-    $('subject').textContent = `« ${text} »`;
     $('answer').textContent = v.text;
     $('answer').className = `answer ${v.camp}`;
     $('score').textContent = `${Math.round((1 - p) * 100)} % gauche · ${Math.round(p * 100)} % droite`;
     $('status').textContent = source === 'exemple'
         ? 'Réponse tirée des exemples d’entraînement.'
         : `Deviné par le modèle en ${Math.round(ms)} ms, dans votre navigateur.`;
-    go.disabled = false;
+    setReady(true);
+    input.focus();
 });
+
+// Le modèle est réparti en plusieurs fichiers (tokenizer, poids...) : on additionne leur progression.
+const downloads = {};
+function onProgress(e) {
+    if (e.status !== 'progress' || !e.total) return;
+    downloads[e.file] = e;
+    const files = Object.values(downloads);
+    const loaded = files.reduce((s, f) => s + f.loaded, 0);
+    const total = files.reduce((s, f) => s + f.total, 0);
+    $('progress').value = (100 * loaded) / total;
+    if (loaded < total) {
+        $('subject').textContent = `Téléchargement du modèle : ${(loaded / 1e6).toFixed(0)} / ${(total / 1e6).toFixed(0)} Mo`;
+        $('answer').textContent = `${Math.floor((100 * loaded) / total)} %`;
+    } else {
+        // Téléchargé : le navigateur prépare encore le modèle pendant une seconde ou deux.
+        $('subject').textContent = 'Préparation du modèle…';
+        $('answer').textContent = '100 %';
+    }
+}
+
+try {
+    [classifier, embed] = await Promise.all([
+        fetch('classifier.json').then((r) => r.json()),
+        createEmbedder(transformers, { progress_callback: onProgress }),
+    ]);
+} catch (err) {
+    setBusy(false);
+    $('progress').hidden = true;
+    $('subject').textContent = `Le modèle n'a pas pu être chargé (${err.message}).`;
+    $('answer').textContent = 'Oups';
+    $('score').textContent = 'Rechargez la page pour réessayer.';
+    throw err;
+}
+
+$('progress').hidden = true;
+setBusy(false);
+$('status').textContent = 'Modèle prêt. Il tourne dans votre navigateur.';
+$('subject').textContent = 'À vous de jouer.';
+$('answer').textContent = '?';
+$('score').textContent = '';
+setReady(true);
+input.focus();
