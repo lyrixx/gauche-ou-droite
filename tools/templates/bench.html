@@ -1,0 +1,475 @@
+<title>Banc d'essai des classifieurs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Public+Sans:wght@400;500;700&display=swap">
+<style>
+/* Mise en page : en-tête et verdict, puis classement (tableau + points), ROC et matrices côte à côte, puis l'ACP. */
+:root {
+    --bg: #f2f3f7;
+    --surface: #ffffff;
+    --ink: #161820;
+    --muted: #5d6272;
+    --line: #d9dce5;
+    --grid: #e8eaf0;
+    --faint: #c9ccd6;
+    --gauche: #d7263d;
+    --droite: #2748c9;
+    --accent: #161820;
+    --display: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif;
+    --body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #12131a; --surface: #1c1e27; --ink: #eceef4; --muted: #9a9fb0; --line: #2f3240;
+        --grid: #262935; --faint: #3c4050; --gauche: #f24b5c; --droite: #6d8bff; --accent: #eceef4;
+        color-scheme: dark;
+    }
+}
+:root[data-theme="dark"] {
+    --bg: #12131a; --surface: #1c1e27; --ink: #eceef4; --muted: #9a9fb0; --line: #2f3240;
+    --grid: #262935; --faint: #3c4050; --gauche: #f24b5c; --droite: #6d8bff; --accent: #eceef4;
+    color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font: 400 1rem/1.55 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: grid; gap: 34px; }
+code { font-size: 0.9em; }
+
+header { display: grid; gap: 8px; }
+.eyebrow { margin: 0; font: 700 0.85rem var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.eyebrow b { color: var(--gauche); font-weight: 700; }
+.eyebrow b + b { color: var(--droite); }
+h1 { margin: 0; font: 900 clamp(2.4rem, 8vw, 3.8rem)/0.92 var(--display); text-transform: uppercase; text-wrap: balance; }
+.lede { margin: 4px 0 0; max-width: 70ch; color: var(--muted); }
+.verdict { margin: 6px 0 0; max-width: 70ch; display: grid; gap: 8px; }
+.verdict p { margin: 0; }
+
+h2 { margin: 0 0 4px; font: 700 1.5rem var(--display); text-transform: uppercase; letter-spacing: 0.02em; }
+.sub { margin: 0 0 14px; color: var(--muted); max-width: 70ch; font-size: 0.95rem; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+
+/* Classement */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { font: 700 0.75rem var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr { cursor: pointer; }
+tbody tr:hover td { background: color-mix(in oklab, var(--ink) 4%, transparent); }
+tbody tr[aria-selected="true"] td { background: color-mix(in oklab, var(--ink) 8%, transparent); }
+tbody tr:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+td.name { min-width: 15ch; }
+td.name b { font-weight: 500; }
+td.name small { display: block; color: var(--muted); font-size: 0.78rem; }
+.tag { display: inline-block; font-size: 0.72rem; color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 0 7px; margin-left: 4px; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+td.params { color: var(--muted); font-size: 0.8rem; min-width: 14ch; }
+.dotcol { width: 34%; min-width: 220px; }
+.track { position: relative; height: 22px; }
+.track .tick { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--grid); }
+.track .whisker { position: absolute; top: 10px; height: 2px; background: var(--muted); border-radius: 1px; }
+.track .dot { position: absolute; top: 5px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--ink); border: 2px solid var(--surface); }
+tr.is-prod .track .dot { background: var(--surface); border: 2px solid var(--ink); }
+.axis { position: relative; height: 16px; font: 500 0.72rem var(--body); color: var(--muted); letter-spacing: 0; text-transform: none; }
+.axis span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+
+/* ROC + matrices */
+.duo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+.panel { padding: 14px 16px 16px; min-width: 0; }
+.panel h3 { margin: 0 0 2px; font: 700 1.1rem var(--display); text-transform: uppercase; letter-spacing: 0.02em; }
+.panel .sub { margin-bottom: 10px; font-size: 0.85rem; }
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.gridline { stroke: var(--grid); stroke-width: 1; }
+.axisline { stroke: var(--line); stroke-width: 1; }
+.ticklabel { fill: var(--muted); font: 500 11px var(--body); }
+.axislabel { fill: var(--muted); font: 500 11.5px var(--body); }
+.diag { stroke: var(--faint); stroke-width: 1.5; stroke-dasharray: 4 4; fill: none; }
+.roc { fill: none; stroke-width: 1.5; stroke: var(--faint); stroke-linejoin: round; }
+.roc.prod { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 6 4; }
+.roc.sel { stroke: var(--ink); stroke-width: 2.5; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 10px 0 0; padding: 0; list-style: none; font-size: 0.82rem; color: var(--muted); }
+.legend li { display: flex; align-items: center; gap: 7px; }
+.legend svg { width: 26px; height: 8px; flex: none; }
+
+.cm { display: grid; grid-template-columns: auto 1fr 1fr; gap: 3px; font-variant-numeric: tabular-nums; }
+.cm .h { font: 700 0.72rem var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 4px 6px; display: flex; align-items: end; }
+.cm .h.row { align-items: center; justify-content: flex-end; text-align: right; }
+.cm .cell { border-radius: 6px; padding: 14px 10px; text-align: center; color: var(--ink); }
+.cm .cell b { display: block; font: 900 1.9rem/1 var(--display); }
+.cm .cell span { font-size: 0.8rem; color: var(--muted); }
+.cm .cell.ok { background: color-mix(in oklab, var(--ink) var(--mix), var(--surface)); }
+.cm .cell.ko { background: var(--surface); border: 1.5px dashed var(--line); }
+.cm-name { margin: 0 0 10px; font-weight: 500; }
+.cm-foot { margin: 10px 0 0; font-size: 0.82rem; color: var(--muted); }
+.minis { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 16px; }
+.mini { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.mini[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.mini:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.mini .t { font-size: 0.78rem; line-height: 1.25; margin-bottom: 6px; min-height: 2.5em; }
+.mini .g { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; font-size: 0.75rem; font-variant-numeric: tabular-nums; text-align: center; }
+.mini .g div { border-radius: 3px; padding: 2px 0; }
+.mini .g .ok { background: color-mix(in oklab, var(--ink) 14%, var(--surface)); }
+.mini .g .ko { border: 1px dashed var(--line); }
+
+/* ACP */
+.pca { padding: 14px 16px 16px; }
+.pt { fill: var(--ink); stroke: var(--surface); stroke-width: 2; }
+.pt.ref { fill: var(--surface); stroke: var(--ink); }
+.band { fill: color-mix(in oklab, var(--ink) 10%, transparent); }
+.line { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.refline { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.vlabel { fill: var(--ink); font: 700 11.5px var(--body); }
+.hit { fill: transparent; cursor: default; }
+
+.tip {
+    position: absolute; pointer-events: none; z-index: 2; max-width: 240px;
+    background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.14); padding: 7px 10px; font-size: 0.82rem; line-height: 1.4; font-variant-numeric: tabular-nums;
+}
+.tip b { font-weight: 700; }
+
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px 32px; }
+.notes h3 { margin: 0 0 6px; font: 700 1.1rem var(--display); text-transform: uppercase; }
+.notes p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+
+/* Stabilité */
+.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.trio .panel h3 { font-size: 1rem; }
+.rtrain { fill: none; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 6 4; }
+.rtest { fill: none; stroke: var(--ink); stroke-width: 2.5; }
+.rfold { fill: none; stroke: var(--faint); stroke-width: 1; }
+.stats { width: 100%; margin-top: 10px; font-size: 0.85rem; }
+.stats th, .stats td { padding: 5px 6px; }
+.stats th { font-size: 0.7rem; }
+.stats td.gap { font-weight: 700; }
+@media (max-width: 960px) { .trio { grid-template-columns: minmax(0, 1fr); max-width: 520px; } }
+
+@media (max-width: 860px) {
+    .duo { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+
+<div class="wrap">
+    <header>
+        <p class="eyebrow">De <b>gauche</b> ou de <b>droite</b> ?</p>
+        <h1>Banc d'essai des classifieurs</h1>
+        <p class="lede" id="lede"></p>
+        <div class="verdict"><p><b>Le SVM à noyau RBF arrive en tête avec 81,8 %</b>, contre 78,8 % pour la régression logistique utilisée aujourd'hui. Il a aussi la meilleure AUC (0,899) et la meilleure log-loss (0,400). Aucun autre modèle ne gagne 3 points.</p>
+<p><b>Les modèles à arbres ne battent pas un modèle linéaire.</b> Random Forest, XGBoost, CatBoost et LightGBM restent entre 77,6 % et 79,4 %. Dans un embedding, l'information est répartie sur des centaines de dimensions à la fois, alors qu'un arbre découpe une variable à la fois.</p>
+<p><b>Réduire la dimension n'apporte rien.</b> La précision augmente avec le nombre de composantes gardées et rejoint celle des 768 dimensions vers 512. La régularisation fait déjà le travail de filtrage.</p>
+<p><b>Le gain le plus simple vient de la régularisation.</b> Avec le même modèle et une régularisation environ 40 fois plus forte (λ ≈ 0,4 au lieu de 0,01), on obtient 80,0 %, et la log-loss passe de 0,568 à 0,450 : le modèle se trompe avec moins d'assurance.</p>
+<p>Avec 972 exemples, la marge d'erreur sur une précision de 80 % est d'environ ±2,5 points. Les écarts d'un point entre modèles ne veulent donc rien dire.</p></div>
+    </header>
+
+    <section>
+        <h2>Le classement</h2>
+        <p class="sub">Précision moyenne sur les 3 répétitions, avec l'écart-type entre répétitions. Le point creux est le modèle actuellement en production. Cliquez une ligne pour voir sa courbe ROC et sa matrice de confusion.</p>
+        <div class="card table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Modèle</th>
+                        <th class="dotcol">Précision<div class="axis" id="dot-axis"></div></th>
+                        <th class="num">Moyenne ± é.-t.</th>
+                        <th class="num">AUC</th>
+                        <th class="num">Log-loss</th>
+                        <th>Réglage retenu</th>
+                    </tr>
+                </thead>
+                <tbody id="rank"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="duo">
+        <div class="card panel">
+            <h3>Courbes ROC</h3>
+            <p class="sub">Classe positive : droite. Chaque point est un seuil de décision ; plus la courbe colle au coin en haut à gauche, mieux c'est.</p>
+            <div class="chart" id="roc-chart"><svg id="roc" viewBox="0 0 420 400" role="img" aria-label="Courbes ROC des classifieurs"></svg><div class="tip" id="roc-tip" hidden></div></div>
+            <ul class="legend">
+                <li><svg viewBox="0 0 26 8"><line x1="0" y1="4" x2="26" y2="4" stroke="var(--ink)" stroke-width="2.5"/></svg><span id="leg-sel"></span></li>
+                <li><svg viewBox="0 0 26 8"><line x1="0" y1="4" x2="26" y2="4" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 4"/></svg>Modèle actuel</li>
+                <li><svg viewBox="0 0 26 8"><line x1="0" y1="4" x2="26" y2="4" stroke="var(--faint)" stroke-width="1.5"/></svg>Les autres</li>
+            </ul>
+        </div>
+        <div class="card panel">
+            <h3>Matrice de confusion</h3>
+            <p class="sub">Au seuil de 50 %, sur la première répétition de la validation croisée. Chaque exemple est prédit par un modèle qui ne l'a pas vu.</p>
+            <p class="cm-name" id="cm-name"></p>
+            <div class="cm" id="cm"></div>
+            <p class="cm-foot" id="cm-foot"></p>
+            <div class="minis" id="minis"></div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Train contre test</h2>
+        <p class="sub">Pour chacun des 15 blocs de la validation croisée, le modèle est entraîné sur 4/5 des exemples. On trace sa courbe ROC sur ces mêmes exemples (train) et sur le 1/5 qu'il n'a pas vu (test). L'écart entre les deux mesure le surapprentissage ; la dispersion des courbes de test d'un bloc à l'autre mesure la stabilité.</p>
+        <div class="trio" id="trio"></div>
+        <ul class="legend">
+            <li><svg viewBox="0 0 26 8"><line x1="0" y1="4" x2="26" y2="4" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 4"/></svg>Train, moyenne des 15 blocs</li>
+            <li><svg viewBox="0 0 26 8"><line x1="0" y1="4" x2="26" y2="4" stroke="var(--ink)" stroke-width="2.5"/></svg>Test, moyenne des 15 blocs (bande : ± 1 écart-type)</li>
+            <li><svg viewBox="0 0 26 8"><line x1="0" y1="4" x2="26" y2="4" stroke="var(--faint)" stroke-width="1.5"/></svg>Test, bloc par bloc</li>
+        </ul>
+        <div class="verdict" style="margin-top: 16px;"><p><b>Le SVM apprend ses exemples d'entraînement par cœur.</b> Il obtient 100 % de précision et une AUC de 1 sur le train, contre 81,8 % sur le test, soit 18 points d'écart. C'est le comportement habituel d'un noyau RBF avec C = 10 : la frontière contourne chaque point d'entraînement. Il reste pourtant le meilleur sur le test, et c'est le test qui compte. La validation croisée imbriquée a d'ailleurs préféré C = 10 à C = 1 ou 3, qui sont plus régularisés.</p>
+<p><b>Il est stable.</b> D'un bloc à l'autre, sa précision en test varie de ±1,6 point et son AUC de ±0,013, comme pour les deux régressions logistiques. Les courbes de test bloc par bloc restent dans un faisceau étroit.</p>
+<p><b>La régression logistique actuelle apprend aussi par cœur</b> (99,9 % sur le train) : c'est un autre signe que sa régularisation est trop faible. Avec C = 0,003, l'écart tombe à 10 points et le score en test progresse.</p>
+<p>Les hyperparamètres sont fixés aux valeurs retenues par le banc d'essai, ce qui rend les chiffres de test un peu optimistes (80,6 % au lieu de 80,0 % pour la régression logistique réglée). Les AUC sont des moyennes par bloc, un peu plus hautes que celles du classement, calculées sur toutes les prédictions mises en commun.</p></div>
+    </section>
+
+    <section>
+        <h2>Réduire la dimension ?</h2>
+        <p class="sub">ACP sur les 768 dimensions, puis régression logistique sur les k premières composantes. La régularisation est réglée à chaque fois en validation croisée imbriquée. La ligne pointillée est la régression logistique réglée sur les 768 dimensions, sans ACP.</p>
+        <div class="card pca">
+            <div class="chart" id="pca-chart"><svg id="pca" viewBox="0 0 720 300" role="img" aria-label="Précision selon le nombre de composantes de l'ACP"></svg><div class="tip" id="pca-tip" hidden></div></div>
+        </div>
+    </section>
+
+    <section class="notes">
+        <div>
+            <h3>Le protocole</h3>
+            <p id="protocol"></p>
+        </div>
+        <div>
+            <h3>AUC et log-loss</h3>
+            <p>La précision ne regarde que le côté de 50 % où tombe la prédiction. L'AUC mesure si le modèle range bien les exemples, quel que soit le seuil. La log-loss punit les erreurs commises avec assurance : un modèle qui dit « 99 % gauche » pour un exemple de droite la fait exploser.</p>
+        </div>
+        <div>
+            <h3>Les données</h3>
+            <p>Les embeddings sont ceux d'EmbeddingGemma 300M (q4), avec le même préfixe que le site : <code>task: classification | query: En politique française, …</code>. Ils sont normalisés (norme 1) puis standardisés pour les modèles linéaires et à noyau.</p>
+        </div>
+    </section>
+</div>
+
+<script>
+const DATA = "__DATA__";
+
+const pct = (v, d = 1) => (v * 100).toFixed(d).replace('.', ',') + ' %';
+const fr = (v, d = 3) => v.toFixed(d).replace('.', ',');
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs = {}, parent) => {
+    const e = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    if (parent) parent.appendChild(e);
+    return e;
+};
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+const models = [...DATA.models].sort((a, b) => b.acc - a.acc);
+const prod = models.find((m) => m.id === 'prod');
+const state = { sel: models[0].id === 'prod' ? models[1].id : models[0].id };
+
+document.getElementById('lede').textContent =
+    `${DATA.models.length} classifieurs entraînés sur les embeddings des ${DATA.n} exemples (768 dimensions), ` +
+    `évalués en validation croisée ${DATA.folds} blocs répétée ${DATA.repeats} fois, sur les mêmes découpages pour tous.`;
+document.getElementById('protocol').textContent =
+    `Validation croisée stratifiée ${DATA.folds} blocs, répétée ${DATA.repeats} fois avec des graines fixes. ` +
+    `Les hyperparamètres sont choisis dans chaque bloc d'entraînement par une seconde validation croisée (3 blocs), ` +
+    `sans jamais voir le bloc de test. « Réglage retenu » indique le choix le plus fréquent sur les ${DATA.folds * DATA.repeats} blocs.`;
+
+// ---- Classement ----
+const lo = Math.floor((Math.min(...models.map((m) => m.acc - m.accStd)) - 0.02) * 20) / 20;
+const hi = Math.ceil((Math.max(...models.map((m) => m.acc + m.accStd)) + 0.02) * 20) / 20;
+const xp = (v) => ((v - lo) / (hi - lo)) * 100;
+const ticks = [];
+for (let t = lo; t <= hi + 1e-9; t += 0.05) ticks.push(t);
+document.getElementById('dot-axis').innerHTML = ticks.map((t) => `<span style="left:${xp(t)}%">${Math.round(t * 100)} %</span>`).join('');
+
+const fmtParams = (m) => {
+    if (!m.best) return '—';
+    const s = Object.entries(m.best).map(([k, v]) => `${k.split('__').pop()} = ${v}`).join(', ');
+    return m.bestShare < 1 ? `${s} (${Math.round(m.bestShare * 100)} % des blocs)` : s;
+};
+const famTag = { 'linéaire': 'linéaire', 'noyau': 'noyau', 'voisins': 'voisins', 'arbres': 'arbres' };
+
+document.getElementById('rank').innerHTML = models.map((m) => `
+    <tr data-id="${m.id}" tabindex="0" class="${m.id === 'prod' ? 'is-prod' : ''}">
+        <td class="name"><b>${esc(m.name)}</b> <span class="tag">${famTag[m.family]}</span></td>
+        <td class="dotcol"><div class="track">
+            ${ticks.map((t) => `<span class="tick" style="left:${xp(t)}%"></span>`).join('')}
+            <span class="whisker" style="left:${xp(m.acc - m.accStd)}%;width:${xp(m.acc + m.accStd) - xp(m.acc - m.accStd)}%"></span>
+            <span class="dot" style="left:${xp(m.acc)}%"></span>
+        </div></td>
+        <td class="num"><b>${pct(m.acc)}</b> <small>± ${fr(m.accStd * 100, 1)}</small></td>
+        <td class="num">${fr(m.auc)}</td>
+        <td class="num">${fr(m.logloss)}</td>
+        <td class="params">${esc(fmtParams(m))}</td>
+    </tr>`).join('');
+
+for (const tr of document.querySelectorAll('#rank tr')) {
+    const pick = () => select(tr.dataset.id);
+    tr.addEventListener('click', pick);
+    tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } });
+}
+
+// ---- ROC ----
+const roc = document.getElementById('roc');
+const R = { l: 60, r: 410, t: 10, b: 350 };
+const rx = (v) => R.l + v * (R.r - R.l);
+const ry = (v) => R.b - v * (R.b - R.t);
+for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+    el('line', { x1: rx(t), x2: rx(t), y1: R.t, y2: R.b, class: 'gridline' }, roc);
+    el('line', { x1: R.l, x2: R.r, y1: ry(t), y2: ry(t), class: 'gridline' }, roc);
+    el('text', { x: rx(t), y: R.b + 16, 'text-anchor': 'middle', class: 'ticklabel' }, roc).textContent = Math.round(t * 100) + ' %';
+    el('text', { x: R.l - 8, y: ry(t) + 4, 'text-anchor': 'end', class: 'ticklabel' }, roc).textContent = Math.round(t * 100) + ' %';
+}
+el('line', { x1: R.l, x2: R.r, y1: R.b, y2: R.b, class: 'axisline' }, roc);
+el('line', { x1: R.l, x2: R.l, y1: R.t, y2: R.b, class: 'axisline' }, roc);
+el('path', { d: `M${rx(0)},${ry(0)} L${rx(1)},${ry(1)}`, class: 'diag' }, roc);
+el('text', { x: (R.l + R.r) / 2, y: R.b + 36, 'text-anchor': 'middle', class: 'axislabel' }, roc).textContent = 'Exemples de gauche classés droite (faux positifs)';
+el('text', { x: 0, y: 0, transform: `translate(10 ${(R.t + R.b) / 2}) rotate(-90)`, 'text-anchor': 'middle', class: 'axislabel' }, roc).textContent = 'Exemples de droite reconnus (vrais positifs)';
+const gOthers = el('g', {}, roc), gProd = el('g', {}, roc), gSel = el('g', {}, roc);
+const rocPath = (m) => 'M' + m.roc.map(([f, t]) => `${rx(f).toFixed(1)},${ry(t).toFixed(1)}`).join('L');
+const paths = {};
+for (const m of models) paths[m.id] = el('path', { d: rocPath(m), class: 'roc' + (m.id === 'prod' ? ' prod' : '') }, m.id === 'prod' ? gProd : gOthers);
+const rocLabel = el('text', { class: 'vlabel', 'text-anchor': 'end', x: R.r - 6, y: R.b - 10 }, roc);
+
+// Survol : la courbe la plus proche du pointeur.
+const rocTip = document.getElementById('roc-tip');
+roc.addEventListener('pointermove', (evt) => {
+    const p = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(roc.getScreenCTM().inverse());
+    if (p.x < R.l || p.x > R.r || p.y < R.t || p.y > R.b) { rocTip.hidden = true; return; }
+    let best = null, bestD = Infinity;
+    for (const m of models) for (const [f, t] of m.roc) {
+        const d = (rx(f) - p.x) ** 2 + (ry(t) - p.y) ** 2;
+        if (d < bestD) { bestD = d; best = m; }
+    }
+    if (!best || bestD > 400) { rocTip.hidden = true; return; }
+    rocTip.innerHTML = `<b>${esc(best.name)}</b><br>AUC ${fr(best.auc)} · précision ${pct(best.acc)}`;
+    rocTip.hidden = false;
+    const box = document.getElementById('roc-chart').getBoundingClientRect();
+    let left = evt.clientX - box.left + 12;
+    if (left + rocTip.offsetWidth > box.width) left = evt.clientX - box.left - rocTip.offsetWidth - 12;
+    rocTip.style.left = Math.max(0, left) + 'px';
+    rocTip.style.top = Math.max(0, evt.clientY - box.top - rocTip.offsetHeight - 10) + 'px';
+});
+roc.addEventListener('pointerleave', () => (rocTip.hidden = true));
+roc.addEventListener('click', () => { if (!rocTip.hidden) { const name = rocTip.querySelector('b').textContent; select(models.find((m) => m.name === name).id); } });
+
+// ---- Matrices de confusion ----
+function cmHtml(m) {
+    const [[gg, gd], [dg, dd]] = m.cm;
+    const rowG = gg + gd, rowD = dg + dd;
+    const cell = (v, row, ok) => `<div class="cell ${ok ? 'ok' : 'ko'}" style="--mix:${Math.round((v / row) * 22)}%"><b>${v}</b><span>${pct(v / row, 0)} de la ligne</span></div>`;
+    return `<div></div><div class="h">Prédit gauche</div><div class="h">Prédit droite</div>` +
+        `<div class="h row">Vrai<br>gauche</div>${cell(gg, rowG, true)}${cell(gd, rowG, false)}` +
+        `<div class="h row">Vrai<br>droite</div>${cell(dg, rowD, false)}${cell(dd, rowD, true)}`;
+}
+document.getElementById('minis').innerHTML = models.map((m) => {
+    const [[gg, gd], [dg, dd]] = m.cm;
+    return `<button type="button" class="mini" data-id="${m.id}" aria-pressed="false"><div class="t">${esc(m.name)}</div>` +
+        `<div class="g"><div class="ok">${gg}</div><div class="ko">${gd}</div><div class="ko">${dg}</div><div class="ok">${dd}</div></div></button>`;
+}).join('');
+for (const b of document.querySelectorAll('.mini')) b.addEventListener('click', () => select(b.dataset.id));
+
+function select(id) {
+    state.sel = id;
+    const m = models.find((x) => x.id === id);
+    for (const tr of document.querySelectorAll('#rank tr')) tr.setAttribute('aria-selected', tr.dataset.id === id);
+    for (const b of document.querySelectorAll('.mini')) b.setAttribute('aria-pressed', b.dataset.id === id);
+    for (const x of models) {
+        const p = paths[x.id];
+        p.classList.toggle('sel', x.id === id);
+        (x.id === id ? gSel : x.id === 'prod' ? gProd : gOthers).appendChild(p);
+    }
+    rocLabel.textContent = `AUC ${fr(m.auc)}`;
+    document.getElementById('leg-sel').textContent = m.name;
+    document.getElementById('cm-name').textContent = m.name;
+    document.getElementById('cm').innerHTML = cmHtml(m);
+    const [[gg, gd], [dg, dd]] = m.cm;
+    document.getElementById('cm-foot').textContent =
+        `${gd + dg} erreurs sur ${DATA.n} : ${gd} exemples de gauche classés droite, ${dg} exemples de droite classés gauche.`;
+}
+
+// ---- ACP ----
+const pca = document.getElementById('pca');
+const sweep = DATA.pcaSweep;
+const full = DATA.models.find((m) => m.id === 'logreg');
+const P = { l: 52, r: 700, t: 18, b: 248 };
+const ks = sweep.map((s) => s.k);
+const kmin = Math.log2(ks[0]), kmax = Math.log2(768);
+const px = (k) => P.l + ((Math.log2(k) - kmin) / (kmax - kmin)) * (P.r - P.l);
+const ylo = Math.floor((Math.min(...sweep.map((s) => s.acc - s.accStd)) - 0.02) * 20) / 20;
+const yhi = Math.ceil((Math.max(full.acc + full.accStd, ...sweep.map((s) => s.acc + s.accStd)) + 0.01) * 20) / 20;
+const py = (v) => P.b - ((v - ylo) / (yhi - ylo)) * (P.b - P.t);
+for (let t = ylo; t <= yhi + 1e-9; t += 0.05) {
+    el('line', { x1: P.l, x2: P.r, y1: py(t), y2: py(t), class: 'gridline' }, pca);
+    el('text', { x: P.l - 8, y: py(t) + 4, 'text-anchor': 'end', class: 'ticklabel' }, pca).textContent = Math.round(t * 100) + ' %';
+}
+for (const k of [...ks, 768]) el('text', { x: px(k), y: P.b + 18, 'text-anchor': 'middle', class: 'ticklabel' }, pca).textContent = k;
+el('line', { x1: P.l, x2: P.r, y1: P.b, y2: P.b, class: 'axisline' }, pca);
+el('text', { x: (P.l + P.r) / 2, y: P.b + 40, 'text-anchor': 'middle', class: 'axislabel' }, pca).textContent = 'Nombre de composantes gardées (échelle logarithmique)';
+el('path', {
+    class: 'band',
+    d: 'M' + sweep.map((s) => `${px(s.k)},${py(s.acc + s.accStd)}`).join('L') + 'L' + [...sweep].reverse().map((s) => `${px(s.k)},${py(s.acc - s.accStd)}`).join('L') + 'Z',
+}, pca);
+el('line', { x1: P.l, x2: P.r, y1: py(full.acc), y2: py(full.acc), class: 'refline' }, pca);
+el('text', { x: P.l + 6, y: py(full.acc) - 7, class: 'ticklabel' }, pca).textContent = `768 dimensions, sans ACP : ${pct(full.acc)}`;
+el('path', { class: 'line', d: 'M' + sweep.map((s) => `${px(s.k)},${py(s.acc)}`).join('L') }, pca);
+const bestK = sweep.reduce((a, b) => (b.acc > a.acc ? b : a));
+for (const s of sweep) {
+    el('circle', { cx: px(s.k), cy: py(s.acc), r: 5, class: 'pt' }, pca);
+    if (s === bestK || s === sweep[0]) {
+        el('text', { x: px(s.k), y: py(s.acc) - 12, 'text-anchor': 'middle', class: 'vlabel' }, pca).textContent = pct(s.acc);
+    }
+}
+el('circle', { cx: px(768), cy: py(full.acc), r: 5, class: 'pt ref' }, pca);
+const pcaTip = document.getElementById('pca-tip');
+for (const s of [...sweep, { k: 768, acc: full.acc, accStd: full.accStd, full: true }]) {
+    const hit = el('circle', { cx: px(s.k), cy: py(s.acc), r: 16, class: 'hit' }, pca);
+    hit.addEventListener('pointerenter', () => {
+        pcaTip.innerHTML = `<b>${s.full ? '768 dimensions, sans ACP' : s.k + ' composantes'}</b><br>précision ${pct(s.acc)} ± ${fr(s.accStd * 100, 1)}`;
+        pcaTip.hidden = false;
+        const box = document.getElementById('pca-chart').getBoundingClientRect();
+        const k = pca.getBoundingClientRect().width / 720;
+        let left = px(s.k) * k + 12;
+        if (left + pcaTip.offsetWidth > box.width) left = px(s.k) * k - pcaTip.offsetWidth - 12;
+        pcaTip.style.left = left + 'px';
+        pcaTip.style.top = Math.max(0, py(s.acc) * k - pcaTip.offsetHeight - 12) + 'px';
+    });
+    hit.addEventListener('pointerleave', () => (pcaTip.hidden = true));
+}
+
+// ---- Stabilité ----
+const STAB = "__STAB__";
+const S = { l: 50, r: 290, t: 8, b: 268 };
+const sx = (v) => S.l + v * (S.r - S.l);
+const sy = (v) => S.b - v * (S.b - S.t);
+const line = (vals) => 'M' + vals.map((v, i) => `${sx(STAB.grid[i]).toFixed(1)},${sy(v).toFixed(1)}`).join('L');
+const trio = document.getElementById('trio');
+for (const m of STAB.models) {
+    const card = document.createElement('div');
+    card.className = 'card panel';
+    card.innerHTML = `<h3>${esc(m.name)}</h3>`;
+    const svg = el('svg', { viewBox: '0 0 310 300', role: 'img', 'aria-label': `Courbes ROC train et test : ${m.name}` });
+    card.appendChild(svg);
+    for (const v of [0, 0.5, 1]) {
+        el('line', { x1: sx(v), x2: sx(v), y1: S.t, y2: S.b, class: 'gridline' }, svg);
+        el('line', { x1: S.l, x2: S.r, y1: sy(v), y2: sy(v), class: 'gridline' }, svg);
+        el('text', { x: sx(v), y: S.b + 15, 'text-anchor': 'middle', class: 'ticklabel' }, svg).textContent = Math.round(v * 100) + ' %';
+        el('text', { x: S.l - 6, y: sy(v) + 4, 'text-anchor': 'end', class: 'ticklabel' }, svg).textContent = Math.round(v * 100) + ' %';
+    }
+    el('text', { x: (S.l + S.r) / 2, y: S.b + 31, 'text-anchor': 'middle', class: 'axislabel' }, svg).textContent = 'Faux positifs';
+    el('text', { x: 0, y: 0, transform: `translate(8 ${(S.t + S.b) / 2}) rotate(-90)`, 'text-anchor': 'middle', class: 'axislabel' }, svg).textContent = 'Vrais positifs';
+    el('path', { d: `M${sx(0)},${sy(0)} L${sx(1)},${sy(1)}`, class: 'diag' }, svg);
+    for (const c of m.rocTestFolds) el('path', { d: line(c), class: 'rfold' }, svg);
+    const up = m.test.mean.map((v, i) => Math.min(1, v + m.test.std[i]));
+    const down = m.test.mean.map((v, i) => Math.max(0, v - m.test.std[i]));
+    el('path', { class: 'band', d: line(up) + 'L' + [...down].reverse().map((v, i) => `${sx(STAB.grid[down.length - 1 - i]).toFixed(1)},${sy(v).toFixed(1)}`).join('L') + 'Z' }, svg);
+    el('path', { d: line(m.train.mean), class: 'rtrain' }, svg);
+    el('path', { d: line(m.test.mean), class: 'rtest' }, svg);
+    const gapAcc = m.accTrain - m.accTest, gapAuc = m.aucTrain - m.aucTest;
+    const tbl = document.createElement('table');
+    tbl.className = 'stats';
+    tbl.innerHTML = `<thead><tr><th></th><th class="num">Train</th><th class="num">Test</th><th class="num">Écart</th></tr></thead><tbody>` +
+        `<tr><td>AUC</td><td class="num">${fr(m.aucTrain)}</td><td class="num">${fr(m.aucTest)} <small>± ${fr(m.aucTestStd)}</small></td><td class="num gap">${fr(gapAuc)}</td></tr>` +
+        `<tr><td>Précision</td><td class="num">${pct(m.accTrain)}</td><td class="num">${pct(m.accTest)} <small>± ${fr(m.accTestStd * 100, 1)}</small></td><td class="num gap">${fr(gapAcc * 100, 1)} pts</td></tr></tbody>`;
+    card.appendChild(tbl);
+    trio.appendChild(card);
+}
+
+select(state.sel);
+</script>

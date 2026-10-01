@@ -35,6 +35,10 @@ jobs:
 
             - run: castor build
 
+            # Les pages de media/ sont générées en local (castor media:build) et versionnées :
+            # on les publie telles quelles sous /media/, sans les sources des slides.
+            - run: cp -r media site/media && rm -rf site/media/slides/src
+
             - uses: actions/configure-pages@v6
 
             - uses: actions/upload-pages-artifact@v5

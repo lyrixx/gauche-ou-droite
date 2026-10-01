@@ -1,0 +1,56 @@
+<section id="regression" data-transition="fade" style="background:#f2f3f7;color:#161820;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="position:absolute;left:128px;top:320px;width:880px;height:600px;background:#fbfbfd;border:1px solid #d9dce5;border-radius:16px;box-shadow:0px 8px 32px rgba(22,24,32,0.08)"></div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#2748c9">Brique 2 : la régression logistique</p>
+<h2 style="font-family:'Big Shoulders Display', 'Arial Narrow', sans-serif;font-size:88px;font-weight:900;line-height:1;text-transform:uppercase">Tracer un trait sur la carte</h2>
+</div>
+<svg aria-label="La même carte, avec ses axes : les exemples classés à la main, points rouges à gauche sur un halo rose, points bleus à droite sur un halo bleu clair. Un point rouge est égaré côté bleu." width="880" height="600" viewBox="0 0 880 600" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:128px;top:320px;width:880px;height:600px">
+<defs><filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="18"/></filter></defs>
+<g filter="url(#soft)">
+<ellipse cx="240" cy="320" rx="200" ry="230" fill="#fbe3e6"/>
+<ellipse cx="680" cy="260" rx="170" ry="220" fill="#e2e8fb"/>
+</g>
+<g stroke="#eceef4" stroke-width="2">
+<line x1="240" y1="30" x2="240" y2="570"/><line x1="640" y1="30" x2="640" y2="570"/>
+<line x1="20" y1="170" x2="860" y2="170"/><line x1="20" y1="430" x2="860" y2="430"/>
+</g>
+<g stroke="#9a9fb0" stroke-width="3">
+<line x1="20" y1="300" x2="856" y2="300"/><line x1="440" y1="580" x2="440" y2="30"/>
+</g>
+<path d="M870 300 l-16 -9 v18 z" fill="#9a9fb0"/>
+<path d="M440 16 l-9 16 h18 z" fill="#9a9fb0"/>
+<g fill="#d7263d" stroke="#fbfbfd" stroke-width="3">
+<circle cx="120" cy="120" r="11"/><circle cx="200" cy="260" r="11"/><circle cx="90" cy="380" r="11"/><circle cx="260" cy="420" r="11"/><circle cx="160" cy="520" r="11"/><circle cx="330" cy="300" r="11"/><circle cx="380" cy="480" r="11"/><circle cx="300" cy="140" r="11"/><circle cx="470" cy="300" r="11"/><circle cx="640" cy="150" r="11"/>
+</g>
+<g fill="#2748c9" stroke="#fbfbfd" stroke-width="3">
+<circle cx="600" cy="80" r="11"/><circle cx="720" cy="200" r="11"/><circle cx="800" cy="120" r="11"/><circle cx="680" cy="380" r="11"/><circle cx="790" cy="450" r="11"/><circle cx="560" cy="240" r="11"/><circle cx="760" cy="530" r="11"/><circle cx="520" cy="160" r="11"/><circle cx="700" cy="300" r="11"/>
+</g>
+</svg>
+<svg aria-label="Premier trait, légèrement penché, tracé au hasard" data-build-in="fade 1" width="880" height="600" viewBox="0 0 880 600" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:128px;top:320px;width:880px;height:600px">
+<line x1="0" y1="210" x2="880" y2="390" stroke="#9a9fb0" stroke-width="4" stroke-dasharray="12 10" stroke-linecap="round"/>
+</svg>
+<p data-build-in="fade 1" style="position:absolute;left:148px;top:492px;width:160px;font-size:24px;color:#5d6272">au début</p>
+<svg aria-label="Trait intermédiaire, en train de pivoter" data-build-in="fade 2" width="880" height="600" viewBox="0 0 880 600" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:128px;top:320px;width:880px;height:600px">
+<line x1="0" y1="80" x2="880" y2="540" stroke="#9a9fb0" stroke-width="4" stroke-dasharray="12 10" stroke-linecap="round"/>
+</svg>
+<p data-build-in="fade 2" style="position:absolute;left:148px;top:360px;width:160px;font-size:24px;color:#5d6272">en cours</p>
+<svg aria-label="Trait final qui sépare les points rouges des points bleus" data-build-in="fade 3" width="880" height="600" viewBox="0 0 880 600" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:128px;top:320px;width:880px;height:600px">
+<line x1="250" y1="0" x2="750" y2="600" stroke="#161820" stroke-width="6" stroke-linecap="round"/>
+</svg>
+<p data-build-in="fade 3" style="position:absolute;left:583px;top:336px;width:260px;font-size:24px;font-weight:700">après 2 000 tours</p>
+<p data-build-in="fade 3" style="position:absolute;left:158px;top:872px;width:200px;font-size:32px;font-weight:700;color:#c11f35">côté gauche</p>
+<p data-build-in="fade 3" style="position:absolute;left:778px;top:380px;width:200px;font-size:32px;font-weight:700;color:#2748c9;text-align:right">côté droit</p>
+<svg aria-label="Un nouveau point, tout près du trait, relié au trait par un pointillé qui montre sa distance" data-build-in="pop 4" width="880" height="600" viewBox="0 0 880 600" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:128px;top:320px;width:880px;height:600px">
+<circle cx="615" cy="470" r="30" fill="#161820" opacity="0.1"/>
+<line x1="615" y1="470" x2="631" y2="457" stroke="#161820" stroke-width="3" stroke-dasharray="4 4"/>
+<circle cx="615" cy="470" r="14" fill="#fbfbfd" stroke="#161820" stroke-width="5"/>
+</svg>
+<p data-build-in="pop 4" style="position:absolute;left:603px;top:760px;width:115px;font-size:24px;line-height:1.2;font-weight:700;text-align:right">nouveau texte</p>
+<p data-build-in="fade 1" style="position:absolute;left:1072px;top:320px;width:720px;font-size:28px;line-height:1.4"><b>1. On part de ~970 exemples classés à la main.</b> Chacun est placé sur la carte, en rouge ou en bleu. Et on pose un trait au hasard.</p>
+<p data-build-in="fade 2" style="position:absolute;left:1072px;top:490px;width:720px;font-size:28px;line-height:1.4"><b>2. À chaque tour, on corrige.</b> On regarde les points du mauvais côté et on tourne ou décale un peu le trait. C'est la descente de gradient.</p>
+<p data-build-in="fade 3" style="position:absolute;left:1072px;top:660px;width:720px;font-size:28px;line-height:1.4"><b>3. Après 2 000 tours, le trait est calé.</b> C'est ça, l'entraînement. Jamais parfait : un point reste du mauvais côté.</p>
+<p data-build-in="fade 4" style="position:absolute;left:1072px;top:790px;width:720px;font-size:28px;line-height:1.4"><b>4. Un nouveau texte ?</b> Son côté donne le camp, sa distance au trait le score. Loin, c'est sûr. Près, l'aiguille hésite.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1440px;font-size:24px;color:#5d6272">En vrai, pas un trait en 2D mais un hyperplan en 768 dimensions : 768 poids pour son orientation, 1 biais pour sa position.</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5d6272;text-align:right">9 / 16</p>
+<aside>~50 s. Avancer en 4 clics. (1) Avant tout, j'ai écrit à la main un fichier d'environ 970 exemples : un texte, et son camp. Chacun est placé sur la carte de la slide d'avant, en rouge ou en bleu. On pose un trait au hasard. (2) À chaque tour, on regarde qui est du mauvais côté et on bouge un peu le trait dans la direction qui réduit l'erreur : c'est la descente de gradient. (3) Après 2 000 tours, il ne bouge plus. Voilà, c'est ça l'entraînement : caler le trait sur les exemples. Il n'est pas parfait, un point reste égaré, et c'est normal. (4) Pour un texte inconnu : on le place sur la carte, on regarde de quel côté il tombe, et à quelle distance. La distance passe dans une sigmoïde qui la transforme en pourcentage : loin du trait, 95 % ; tout près, 50/50, et l'aiguille de la démo hésite. En 768 dimensions, ce trait devient un hyperplan : 768 poids et un biais, c'est tout le contenu du fichier classifier.json. La régularisation L2 empêche les poids de s'emballer, donc le modèle d'être trop sûr de lui. (Comme sur la slide d'avant, les points sont dessinés pour l'exemple.)</aside>
+</section>

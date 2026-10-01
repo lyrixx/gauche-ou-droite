@@ -1,0 +1,25 @@
+<section id="pieges" data-transition="fade" style="background:#f2f3f7;color:#161820;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#2748c9">Les pièges du navigateur</p>
+<h2 style="font-family:'Big Shoulders Display', 'Arial Narrow', sans-serif;font-size:88px;font-weight:900;line-height:1;text-transform:uppercase">Ça marchait pourtant dans Node</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#fbfbfd;border:1px solid #d9dce5;border-radius:16px;padding:40px">
+<h3 style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:32px;font-weight:700">GatherBlockQuantized</h3>
+<p style="font-size:28px;line-height:1.4;color:#5d6272">La version compressée du modèle (q4) utilise une opération que le moteur WebAssembly ne sait pas exécuter.</p>
+<p style="font-size:28px;line-height:1.4;font-weight:700">→ Une variante sans cette opération, pour l'entraînement ET pour le site.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#fbfbfd;border:1px solid #d9dce5;border-radius:16px;padding:40px">
+<h3 style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:32px;font-weight:700">COOP / COEP</h3>
+<p style="font-size:28px;line-height:1.4;color:#5d6272">Sans ces en-têtes HTTP, pas de multi-thread. GitHub Pages ne les envoie pas : un seul cœur, ~1 s par calcul, la page gèle.</p>
+<p style="font-size:28px;line-height:1.4;font-weight:700">→ wasm.proxy = true : le calcul part dans un Web Worker.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#fbfbfd;border:1px solid #d9dce5;border-radius:16px;padding:40px">
+<h3 style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:32px;font-weight:700">submit()</h3>
+<p style="font-size:28px;line-height:1.4;color:#5d6272">Envoyer pendant le téléchargement rechargeait la page… et relançait les 200 Mo.</p>
+<p style="font-size:28px;line-height:1.4;font-weight:700">→ Formulaire verrouillé et barre de progression.</p>
+</div>
+</div>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5d6272;text-align:right">15 / 16</p>
+<aside>~45 s. Trois pièges que Node ne montre pas. Un : pour tenir en 200 Mo, le modèle est compressé (q4), et cette version utilise une opération que le moteur WebAssembly ne connaît pas ; il faut une variante sans elle, et la même à l'entraînement, sinon les textes ne tombent plus au même endroit sur la carte. Deux : GitHub Pages ne permet pas d'envoyer les en-têtes COOP/COEP, donc pas de multi-thread, un calcul prend une seconde et la page gèle ; une option de transformers.js déplace tout dans un Web Worker. Trois : mon préféré, cliquer sur Envoyer pendant le téléchargement rechargeait la page et relançait les 200 Mo.</aside>
+</section>

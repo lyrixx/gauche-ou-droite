@@ -23,11 +23,14 @@ castor serve     # ouvre le site sur http://localhost:8000
 ```bash
 castor predict "le vélo" "facho"   # teste depuis le terminal
 castor build                       # install + train, c'est ce que lance la CI
+castor media:build                 # régénère les pages de media/ (voir tools/README.md)
 ```
 
 **Améliorer les réponses.** Ajoutez ou corrigez des lignes dans [`data/exemples.csv`](data/exemples.csv), relancez `castor train`, rechargez la page.
 
-**Déploiement.** Chaque push sur `main` lance [la CI](.github/workflows/deploy.yml). Elle réentraîne le classifieur avec `castor build` et publie le dossier `site/` sur GitHub Pages.
+**Déploiement.** Chaque push sur `main` lance [la CI](.github/workflows/deploy.yml). Elle réentraîne le classifieur avec `castor build` et publie le dossier `site/` sur GitHub Pages, avec les pages de `media/` sous [`/media/`](https://lyrixx.github.io/gauche-ou-droite/media/).
+
+**Les coulisses.** [`media/`](https://lyrixx.github.io/gauche-ou-droite/media/) rassemble les slides du lightning talk, une carte des exemples (le nuage) et un banc d'essai de douze classifieurs. Ces pages sont générées par les scripts de [`tools/`](tools/README.md).
 
 ---
 
@@ -188,6 +191,8 @@ site/                      le site statique publié sur GitHub Pages
   config.js                le modèle utilisé (partagé Node / navigateur)
   classifier.js            normalisation, table, prédiction (partagé Node / navigateur)
   classifier.json          généré par l'entraînement, non versionné
-castor.php                 les tâches install, train, serve, predict, build
+media/                     les pages publiées sous /media/ : slides, nuage des exemples, banc d'essai
+tools/                     les scripts qui génèrent media/ (voir tools/README.md)
+castor.php                 les tâches install, train, serve, predict, build, media:*
 .github/workflows/         déploiement GitHub Pages
 ```

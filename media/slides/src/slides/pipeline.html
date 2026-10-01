@@ -1,0 +1,32 @@
+<section id="pipeline" data-transition="fade" style="background:#f2f3f7;color:#161820;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#2748c9">Récap</p>
+<h2 style="font-family:'Big Shoulders Display', 'Arial Narrow', sans-serif;font-size:88px;font-weight:900;line-height:1;text-transform:uppercase">Deux briques, zéro serveur</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:stretch;gap:16px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#fbfbfd;border:1px solid #d9dce5;border-radius:16px;padding:32px">
+<p style="font-size:28px;color:#5d6272">Un texte</p>
+<h3 style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:32px;font-weight:700">« la pétanque »</h3>
+</div>
+<x-shape kind="arrow-right" style="background:#5d6272;width:48px;height:24px;align-self:center"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#fbfbfd;border:2px solid #2748c9;border-radius:16px;padding:32px">
+<p style="font-size:28px;font-weight:700;color:#2748c9">Brique 1</p>
+<h3 style="font-size:44px;font-weight:700;line-height:1.15">Le placer sur la carte</h3>
+<p style="font-size:28px;line-height:1.35;color:#5d6272">EmbeddingGemma, 197 Mo, téléchargé une fois</p>
+</div>
+<x-shape kind="arrow-right" style="background:#5d6272;width:48px;height:24px;align-self:center"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#fbfbfd;border:2px solid #2748c9;border-radius:16px;padding:32px">
+<p style="font-size:28px;font-weight:700;color:#2748c9">Brique 2</p>
+<h3 style="font-size:44px;font-weight:700;line-height:1.15">De quel côté du trait ?</h3>
+<p style="font-size:28px;line-height:1.35;color:#5d6272">768 poids + 1 biais, un JSON de quelques Ko</p>
+</div>
+<x-shape kind="arrow-right" style="background:#5d6272;width:48px;height:24px;align-self:center"></x-shape>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#fbfbfd;border:1px solid #d9dce5;border-radius:16px;padding:32px">
+<p style="font-size:28px;color:#5d6272">Réponse</p>
+<h3 style="font-size:44px;font-weight:700;line-height:1.15">Un camp + un score</h3>
+</div>
+</div>
+<p style="font-size:32px;line-height:1.4;color:#5d6272">On trace le trait une fois, dans Node. Ensuite, tout tourne dans votre navigateur.</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5d6272;text-align:right">10 / 16</p>
+<aside>~15 s. Récap : on place le texte sur la carte, on regarde de quel côté du trait il tombe. Le trait, on le calcule une fois sur ma machine, dans Node ; le navigateur télécharge le modèle une fois, puis fait tout en local. (Si question : la régression est écrite à la main, sans dépendance, et les textes déjà présents dans les exemples court-circuitent le modèle via une table de correspondance.)</aside>
+</section>

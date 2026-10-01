@@ -1,0 +1,46 @@
+<section id="modeles" data-transition="fade" style="background:#f2f3f7;color:#161820;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#2748c9">Leçon n°2</p>
+<h2 style="font-family:'Big Shoulders Display', 'Arial Narrow', sans-serif;font-size:88px;font-weight:900;line-height:1;text-transform:uppercase">Changer de carte, ça change tout</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px">
+<p style="width:560px;font-size:24px;color:#5d6272;text-align:right">Modèle d'embeddings</p>
+<p style="width:120px;font-size:24px;color:#5d6272">Taille</p>
+<p style="font-size:24px;color:#5d6272">Bonnes réponses sur des exemples cachés</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px">
+<p style="width:560px;font-size:28px;font-weight:700;text-align:right">multilingual-e5-small · 1er choix</p>
+<p style="width:120px;font-size:28px;color:#5d6272">118 Mo</p>
+<div style="width:560px;height:40px;background:#5d6272;border-radius:0px 4px 4px 0px"></div>
+<p style="font-size:28px;font-weight:700">~70 %</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px">
+<p style="width:560px;font-size:28px;text-align:right">multilingual-e5-large</p>
+<p style="width:120px;font-size:28px;color:#5d6272">562 Mo</p>
+<div style="width:608px;height:40px;background:#c3c7d3;border-radius:0px 4px 4px 0px"></div>
+<p style="font-size:28px;font-weight:700">~76 %</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px">
+<p style="width:560px;font-size:28px;text-align:right">Snowflake Arctic Embed v2</p>
+<p style="width:120px;font-size:28px;color:#5d6272">311 Mo</p>
+<div style="width:616px;height:40px;background:#c3c7d3;border-radius:0px 4px 4px 0px"></div>
+<p style="font-size:28px;font-weight:700">~77 %</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px">
+<p style="width:560px;font-size:28px;font-weight:700;text-align:right">EmbeddingGemma · choix final</p>
+<p style="width:120px;font-size:28px;color:#5d6272">197 Mo</p>
+<div style="width:640px;height:40px;background:#2748c9;border-radius:0px 4px 4px 0px"></div>
+<p style="font-size:28px;font-weight:700">~80 %</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:24px">
+<p style="width:560px;font-size:28px;text-align:right">Qwen3-Embedding 0.6B</p>
+<p style="width:120px;font-size:28px;color:#5d6272">614 Mo</p>
+<div style="width:640px;height:40px;background:#c3c7d3;border-radius:0px 4px 4px 0px"></div>
+<p style="font-size:28px;font-weight:700">~80 %</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1440px;font-size:24px;color:#5d6272">Mesuré sur des exemples cachés pendant l'entraînement, les mêmes pour tous les modèles. Chiffres arrondis.</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5d6272;text-align:right">12 / 16</p>
+<aside>~40 s. Alors j'ai changé de carte, c'est-à-dire de modèle d'embeddings, et j'ai monté un banc d'essai : 11 modèles, jusqu'à 8 formulations du texte. Pour mesurer honnêtement, on cache un cinquième des exemples, on trace le trait avec le reste, et on compte les bonnes réponses sur la partie cachée (c'est la validation croisée), toujours sur les mêmes découpages. Résultat : EmbeddingGemma, sorti par Google en 2025, gagne une dizaine de points sur mon premier choix, pour 80 Mo de plus. Les modèles plus gros mais plus vieux, comme e5-large (562 Mo), font moins bien. Et Qwen3, trois fois plus gros, ne fait pas mieux… sauf si on lui parle bien. On y revient.</aside>
+</section>

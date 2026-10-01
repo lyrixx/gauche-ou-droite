@@ -1,0 +1,21 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-09-30T16:17:21Z"},
+  "lists": "css",
+  "title": "De gauche ou de droite ? — lightning talk",
+  "cover": "cover",
+  "order": ["cover", "idee", "jev", "pasllm", "planb", "demo", "boite", "embedding", "regression", "pipeline", "donnees", "modeles", "qwen", "zeroshot", "pieges", "fin"],
+  "sections": {
+    "s1": {"description": "Intro : l'idée, le plan A avec Jev, pourquoi pas un LLM, le plan B", "start": "cover"},
+    "s2": {"description": "Démo live", "start": "demo"},
+    "s3": {"description": "Comment ça marche : une carte et un trait", "start": "boite"},
+    "s4": {"description": "Ce qu'on a appris en mesurant", "start": "donnees"},
+    "s5": {"description": "Les pièges du navigateur et merci", "start": "pieges"}
+  },
+  "faces": {
+    "big-shoulders-display": {"family": "Big Shoulders Display", "href": "https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&display=swap"},
+    "public-sans": {"family": "Public Sans", "href": "https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap"},
+    "jetbrains-mono": {"family": "JetBrains Mono", "href": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"}
+  },
+  "designSystems": []
+}

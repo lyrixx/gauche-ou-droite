@@ -1,0 +1,591 @@
+<title>Nuage gauche-droite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Public+Sans:wght@400;500;700&display=swap">
+<style>
+/* Mise en page : en-tête, barre de réglages, puis nuage (large) + légende (colonne étroite), puis notes et tableau. */
+:root {
+    --bg: #f2f3f7;
+    --surface: #ffffff;
+    --ink: #161820;
+    --muted: #5d6272;
+    --line: #d9dce5;
+    --gauche: #d7263d;
+    --droite: #2748c9;
+    --mid: #b4b8c4;
+    --faint: #d5d8e0;
+    --display: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif;
+    --body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #12131a; --surface: #1c1e27; --ink: #eceef4; --muted: #9a9fb0; --line: #2f3240;
+        --gauche: #f24b5c; --droite: #6d8bff; --mid: #5b6072; --faint: #343747;
+        color-scheme: dark;
+    }
+}
+:root[data-theme="dark"] {
+    --bg: #12131a; --surface: #1c1e27; --ink: #eceef4; --muted: #9a9fb0; --line: #2f3240;
+    --gauche: #f24b5c; --droite: #6d8bff; --mid: #5b6072; --faint: #343747;
+    color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--ink); font: 400 1rem/1.55 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: grid; gap: 22px; }
+
+header { display: grid; gap: 8px; }
+.eyebrow { margin: 0; font: 700 0.85rem var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.eyebrow b { color: var(--gauche); font-weight: 700; }
+.eyebrow b + b { color: var(--droite); }
+h1 { margin: 0; font: 900 clamp(2.4rem, 8vw, 3.8rem)/0.92 var(--display); text-transform: uppercase; text-wrap: balance; }
+.lede { margin: 4px 0 0; max-width: 66ch; color: var(--muted); }
+.meta { margin: 4px 0 0; display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 0.9rem; font-variant-numeric: tabular-nums; color: var(--muted); }
+.meta strong { color: var(--ink); font-weight: 700; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; }
+.group { display: grid; gap: 4px; min-width: 0; }
+.group > span, .group > label { font: 700 0.78rem var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 3px; gap: 2px; }
+.seg button {
+    font: 500 0.88rem var(--body); color: var(--muted); background: transparent;
+    border: 0; border-radius: 6px; padding: 6px 12px; cursor: pointer;
+}
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.search { flex: 1 1 220px; }
+.search input {
+    width: 100%; font: 400 0.95rem var(--body); color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px;
+}
+.search-status { font-size: 0.82rem; color: var(--muted); min-height: 1.3em; font-variant-numeric: tabular-nums; }
+
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 18px; align-items: start; }
+.chart { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 8px; min-width: 0; }
+.chart svg { display: block; width: 100%; height: auto; touch-action: manipulation; }
+.pt { stroke: var(--surface); stroke-width: 1.5; transition: transform 0.7s cubic-bezier(.4, 0, .2, 1), opacity 0.2s; }
+.still .pt { transition: none; }
+svg.searching .pt { opacity: 0.12; }
+svg.theming .pt { opacity: 0.12; }
+svg.theming .pt.in-theme { opacity: 1; }
+.theme-label { fill: var(--ink); font: 700 15px var(--display); letter-spacing: 0.08em; text-transform: uppercase; paint-order: stroke; stroke: var(--surface); stroke-width: 5px; stroke-linejoin: round; pointer-events: none; }
+svg.theming .theme-label:not(.on) { opacity: 0.25; }
+svg.searching .pt.hit { opacity: 1; }
+#focus { fill: none; stroke: var(--ink); stroke-width: 2; pointer-events: none; }
+.axis-note { fill: var(--muted); font: 500 13px var(--body); }
+@media (prefers-reduced-motion: reduce) { .pt { transition: none; } }
+
+.tip {
+    position: absolute; pointer-events: none; z-index: 2; max-width: 260px;
+    background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 8px;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.14); padding: 8px 11px; font-size: 0.85rem; line-height: 1.4;
+}
+.tip strong { display: block; font-size: 0.95rem; overflow-wrap: anywhere; margin-bottom: 3px; }
+.tip .row { display: flex; align-items: center; gap: 6px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tip .row b { color: var(--ink); font-weight: 500; }
+
+aside { display: grid; gap: 18px; font-size: 0.9rem; }
+aside h2 { margin: 0 0 8px; font: 700 0.78rem var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.legend { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; font-variant-numeric: tabular-nums; }
+.legend li { display: flex; align-items: center; gap: 8px; }
+.sw { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+.ramp { height: 10px; border-radius: 5px; background: linear-gradient(90deg, var(--gauche), var(--mid), var(--droite)); }
+.ramp-labels { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
+.hint { margin: 0; color: var(--muted); }
+
+.takeaways { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px 40px; margin-top: 6px; }
+.takeaways div { min-width: 0; }
+.takeaways h3 { margin: 0 0 4px; font: 700 1.05rem/1.2 var(--display); text-transform: uppercase; letter-spacing: 0.02em; }
+.takeaways p { margin: 0; color: var(--muted); font-size: 0.93rem; max-width: 62ch; }
+.takeaways p b { color: var(--ink); font-weight: 500; }
+.tour { display: grid; gap: 6px; }
+.tour button {
+    text-align: left; font: 500 0.86rem/1.3 var(--body); color: var(--ink); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; cursor: pointer;
+}
+.tour button:hover { border-color: var(--muted); }
+.tour button[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.tour-note { margin: 4px 0 0; padding: 10px 12px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); font-size: 0.86rem; color: var(--ink); }
+.bar { position: relative; height: 8px; border-radius: 4px; background: var(--faint); min-width: 90px; }
+.bar span { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; }
+.bar-cell { display: flex; align-items: center; gap: 10px; }
+.bar-cell .v { width: 3.6em; text-align: right; flex: none; }
+#themes tr { cursor: default; }
+#themes tr:hover td { background: color-mix(in oklab, var(--ink) 5%, transparent); }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px 32px; }
+.notes section { min-width: 0; }
+h2.section { margin: 0 0 6px; font: 700 1.25rem var(--display); text-transform: uppercase; letter-spacing: 0.02em; }
+.notes p { margin: 0 0 8px; color: var(--muted); max-width: 62ch; }
+.notes p b { color: var(--ink); font-weight: 500; }
+
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font: 700 0.75rem var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+td:first-child { white-space: normal; min-width: 12ch; }
+tr:last-child td { border-bottom: 0; }
+td .camp { display: inline-flex; align-items: center; gap: 6px; }
+td.num { text-align: right; }
+th.num { text-align: right; }
+
+.theme-bg { fill: var(--surface); opacity: 0.88; pointer-events: none; }
+svg.theming .theme-bg:not(.on) { opacity: 0.2; }
+@media (max-width: 480px) { .takeaways { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) {
+    .stage { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+
+<div class="wrap">
+    <header>
+        <p class="eyebrow">De <b>gauche</b> ou de <b>droite</b> ?</p>
+        <h1>Le nuage des exemples</h1>
+        <p class="lede">Chaque point est un des exemples de <code>data/exemples.csv</code>. EmbeddingGemma le transforme en un vecteur de 768 nombres, puis t-SNE ramène ces vecteurs sur un plan en gardant ensemble les textes de sens proche. La question est simple : <b>avant même qu'on lui apprenne quoi que ce soit, le modèle d'embeddings range-t-il la gauche d'un côté et la droite de l'autre ?</b></p>
+        <p class="meta" id="meta"></p>
+    </header>
+
+    <section>
+        <h2 class="section">Ce qu'on en conclut</h2>
+        <div class="takeaways">
+            <div>
+                <h3>La carte est rangée par thème, pas par camp</h3>
+                <p>Les personnalités sont ensemble, les lieux ensemble, la nourriture ensemble, les vêtements ensemble. <b>Dans chaque thème, on trouve les deux couleurs.</b> Le modèle d'embeddings a d'abord appris de quoi parle un texte ; le camp n'arrive qu'en second.</p>
+            </div>
+            <div>
+                <h3>Dans un thème, le camp se voit parfois très bien</h3>
+                <p>Les 8 plus proches voisins de « la Rolex » sont tous étiquetés droite (montre suisse, Porsche, sac Louis Vuitton…). Ceux des « vêtements de seconde main » sont surtout de gauche (friperie, Vinted, tote bag). Sur les modes de vie, les clichés sont déjà dans les vecteurs.</p>
+            </div>
+            <div>
+                <h3>Ce qui coince : les prises de position</h3>
+                <p>Le modèle se trompe sur <b>30 %</b> des exemples de fiscalité et d'immigration, contre <b>10 %</b> pour les partis et étiquettes. Un embedding dit de quoi on parle, pas si on est pour ou contre : le plus proche voisin de « la loi anti-squat » est « le squat ».</p>
+            </div>
+            <div>
+                <h3>Pourquoi le nuage paraît mélangé malgré 79 %</h3>
+                <p>Parmi les 10 plus proches voisins d'un exemple, seuls <b>65 %</b> ont la même étiquette. t-SNE montre ces voisinages, d'où le mélange. La régression, elle, cherche une seule direction « gauche → droite » qui traverse tous les thèmes, et elle fait mieux (79 %) que les plus proches voisins (76 %).</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="controls">
+        <div class="group">
+            <span id="proj-label">Projection</span>
+            <div class="seg" role="group" aria-labelledby="proj-label">
+                <button type="button" id="proj-tsne" data-proj="tsne" aria-pressed="true">t-SNE</button>
+                <button type="button" id="proj-pca" data-proj="pca" aria-pressed="false">ACP</button>
+            </div>
+        </div>
+        <div class="group">
+            <span id="color-label">Couleur</span>
+            <div class="seg" role="group" aria-labelledby="color-label">
+                <button type="button" id="color-camp" data-color="camp" aria-pressed="true">Étiquette</button>
+                <button type="button" id="color-proba" data-color="proba" aria-pressed="false">Avis du modèle</button>
+                <button type="button" id="color-err" data-color="err" aria-pressed="false">Erreurs</button>
+            </div>
+        </div>
+        <div class="group">
+            <span id="marks-label">Repères</span>
+            <div class="seg" role="group" aria-labelledby="marks-label">
+                <button type="button" id="themes-toggle" aria-pressed="true">Thèmes</button>
+            </div>
+        </div>
+        <div class="group search">
+            <label for="q">Chercher un exemple</label>
+            <input id="q" type="search" placeholder="raclette, vélo, chasse…" autocomplete="off">
+        </div>
+    </div>
+
+    <div class="stage">
+        <div class="chart" id="chart">
+            <svg id="svg" class="still" viewBox="0 0 1000 720" role="img" aria-labelledby="svg-title">
+                <title id="svg-title">Projection en deux dimensions des embeddings des exemples, colorés selon leur camp</title>
+                <g id="pts"></g>
+                <g id="pts-top"></g>
+                <g id="labels"></g>
+                <circle id="focus" r="9" hidden></circle>
+                <text class="axis-note" id="axis-note" x="992" y="710" text-anchor="end"></text>
+            </svg>
+            <div class="tip" id="tip" hidden></div>
+            <div class="search-status" id="search-status" aria-live="polite"></div>
+        </div>
+        <aside>
+            <div>
+                <h2 id="legend-title">Légende</h2>
+                <div id="legend"></div>
+            </div>
+            <p class="hint" id="mode-hint"></p>
+            <div>
+                <h2>Visite guidée</h2>
+                <div class="tour" id="tour"></div>
+                <p class="tour-note" id="tour-note" hidden></p>
+            </div>
+        </aside>
+    </div>
+
+    <div class="notes">
+        <section>
+            <h2 class="section">Lire un t-SNE</h2>
+            <p>t-SNE garde les <b>voisinages</b> : deux points proches sur le plan ont des vecteurs proches. En revanche, la distance entre deux groupes éloignés, la taille d'un groupe et les axes ne veulent rien dire. On a utilisé la distance cosinus, une perplexité de 30 et une graine fixe.</p>
+        </section>
+        <section>
+            <h2 class="section">Lire l'ACP</h2>
+            <p>L'ACP est une projection <b>linéaire</b> sur les deux directions où les vecteurs varient le plus. Ces deux axes ne gardent que <b id="pca-var"></b> de la variance. Si les camps se mélangent ici, ça ne veut pas dire qu'ils sont inséparables en 768 dimensions.</p>
+        </section>
+        <section>
+            <h2 class="section">L'avis du modèle</h2>
+            <p>Chaque exemple est jugé par une régression logistique <b>qui ne l'a pas vu</b> : validation croisée en 5 blocs, même régularisation que <code>train.mjs</code> (λ = 0,01), recalculée avec scikit-learn. C'est ce qui donne les <b id="acc-note"></b>.</p>
+        </section>
+    </div>
+
+    <section>
+        <h2 class="section">Thème par thème</h2>
+        <p class="hint" style="margin: 0 0 10px;">Les thèmes sont des regroupements automatiques de la carte t-SNE (k-means) ; leurs noms ont été donnés à la main d'après leur contenu. Survolez une ligne pour voir le thème sur la carte.</p>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Thème</th><th class="num">Exemples</th><th>Étiquetés droite</th><th>Erreurs du modèle</th></tr></thead>
+                <tbody id="themes"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section>
+        <h2 class="section">Les erreurs les plus franches</h2>
+        <p class="hint" style="margin: 0 0 10px;">Les exemples où le modèle, sans les avoir vus, se trompe avec le plus d'assurance.</p>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Exemple</th><th>Étiquette</th><th class="num">Le modèle dit</th></tr></thead>
+                <tbody id="errors"></tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<script>
+const DATA = "__DATA__";
+
+const W = 1000, H = 720, PAD = 22;
+const pct = (v, d = 0) => (v * 100).toFixed(d).replace('.', ',') + ' %';
+const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[-_']/g, ' ').replace(/\s+/g, ' ').trim();
+const camp = (y) => (y ? 'droite' : 'gauche');
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+
+const pts = DATA.points.map((d, i) => ({ ...d, i, err: (d.p >= 0.5 ? 1 : 0) !== d.y, n: norm(d.t) }));
+
+// Coordonnées à l'écran : même échelle sur les deux axes pour ne pas déformer le nuage.
+function fit(kx, ky, key) {
+    const xs = pts.map((p) => p[kx]), ys = pts.map((p) => p[ky]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const s = Math.min((W - 2 * PAD) / (x1 - x0), (H - 2 * PAD) / (y1 - y0));
+    const ox = (W - (x1 - x0) * s) / 2, oy = (H - (y1 - y0) * s) / 2;
+    pts.forEach((p) => (p[key] = [ox + (p[kx] - x0) * s, H - oy - (p[ky] - y0) * s]));
+    return (a, b) => [ox + (a - x0) * s, H - oy - (b - y0) * s];
+}
+const tsneXY = fit('tx', 'ty', 'tsne');
+fit('px', 'py', 'pca');
+
+// Ordre de dessin mélangé (graine fixe) pour qu'aucun camp ne recouvre l'autre systématiquement.
+const order = pts.map((_, i) => i);
+let seed = 7;
+for (let i = order.length - 1; i > 0; i--) {
+    seed = (seed * 16807) % 2147483647;
+    const j = Math.floor((seed / 2147483647) * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+}
+
+const svg = document.getElementById('svg');
+const gBase = document.getElementById('pts');
+const gTop = document.getElementById('pts-top');
+const focus = document.getElementById('focus');
+const tip = document.getElementById('tip');
+const chart = document.getElementById('chart');
+const NS = 'http://www.w3.org/2000/svg';
+
+for (const i of order) {
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('r', '4.5');
+    c.setAttribute('class', 'pt');
+    pts[i].el = c;
+    gBase.appendChild(c);
+}
+
+const counts = { gauche: pts.filter((p) => !p.y).length, droite: pts.filter((p) => p.y).length };
+const nErr = pts.filter((p) => p.err).length;
+document.getElementById('meta').innerHTML =
+    `<span><strong>${pts.length}</strong> exemples</span>` +
+    `<span><strong>${counts.gauche}</strong> gauche · <strong>${counts.droite}</strong> droite</span>` +
+    `<span><strong>768</strong> dimensions</span>` +
+    `<span><strong>${pct(DATA.accuracy, 1)}</strong> de bonnes réponses en validation croisée</span>`;
+document.getElementById('pca-var').textContent = pct(DATA.pcaVariance, 1);
+document.getElementById('acc-note').textContent = pct(DATA.accuracy, 1) + ' de bonnes réponses';
+
+const state = { proj: 'tsne', color: 'camp', hover: null };
+
+function probaFill(p) {
+    // Divergent : gauche → gris neutre à 50/50 → droite.
+    if (p < 0.5) return `color-mix(in oklab, var(--gauche) ${((0.5 - p) * 200).toFixed(0)}%, var(--mid))`;
+    return `color-mix(in oklab, var(--droite) ${((p - 0.5) * 200).toFixed(0)}%, var(--mid))`;
+}
+
+function paint() {
+    for (const p of pts) {
+        let fill;
+        if (state.color === 'camp') fill = `var(--${camp(p.y)})`;
+        else if (state.color === 'proba') fill = probaFill(p.p);
+        else fill = p.err ? `var(--${camp(p.y)})` : 'var(--faint)';
+        p.el.style.fill = fill;
+        p.el.setAttribute('r', state.color === 'err' && p.err ? '5.5' : '4.5');
+        // En mode erreurs, les points mal classés passent au premier plan.
+        const parent = state.color === 'err' && p.err ? gTop : gBase;
+        if (p.el.parentNode !== parent) parent.appendChild(p.el);
+    }
+    if (state.color !== 'err') for (const i of order) gBase.appendChild(pts[i].el);
+    renderLegend();
+}
+
+function place() {
+    for (const p of pts) {
+        const [x, y] = p[state.proj];
+        p.el.style.transform = `translate(${x}px, ${y}px)`;
+    }
+    document.getElementById('axis-note').textContent =
+        state.proj === 'tsne' ? 't-SNE · les axes n’ont pas d’unité' : `ACP · 2 axes = ${pct(DATA.pcaVariance, 1)} de la variance`;
+    if (state.hover) showTip(state.hover);
+}
+
+function renderLegend() {
+    const legend = document.getElementById('legend');
+    const title = document.getElementById('legend-title');
+    const hint = document.getElementById('mode-hint');
+    const sw = (v) => `<span class="sw" style="background: ${v}"></span>`;
+    if (state.color === 'camp') {
+        title.textContent = 'Étiquette dans le CSV';
+        legend.innerHTML = `<ul class="legend"><li>${sw('var(--gauche)')}Gauche · ${counts.gauche}</li><li>${sw('var(--droite)')}Droite · ${counts.droite}</li></ul>`;
+        hint.textContent = 'La couleur est l’étiquette mise à la main. Le modèle d’embeddings, lui, ne la connaît pas : si les couleurs se regroupent, c’est qu’il place déjà les deux camps à des endroits différents.';
+    } else if (state.color === 'proba') {
+        title.textContent = 'Probabilité « droite »';
+        legend.innerHTML = `<div class="ramp"></div><div class="ramp-labels"><span>100 % gauche</span><span>50/50</span><span>100 % droite</span></div>`;
+        hint.textContent = 'Ce que la régression logistique répond pour chaque exemple sans l’avoir vu à l’entraînement. Les points gris sont ceux où elle hésite.';
+    } else {
+        const e = (y) => pts.filter((p) => p.err && p.y === y).length;
+        title.textContent = 'Erreurs du modèle';
+        legend.innerHTML = `<ul class="legend"><li>${sw('var(--faint)')}Bien classé · ${pts.length - nErr}</li><li>${sw('var(--gauche)')}Mal classé, étiqueté gauche · ${e(0)}</li><li>${sw('var(--droite)')}Mal classé, étiqueté droite · ${e(1)}</li></ul>`;
+        hint.textContent = `${nErr} exemples sur ${pts.length} sont mal classés par un modèle qui ne les a pas vus. La couleur est leur vraie étiquette.`;
+    }
+    svg.querySelector('title').textContent = `Projection ${state.proj === 'tsne' ? 't-SNE' : 'ACP'} des embeddings des exemples, couleur : ${title.textContent.toLowerCase()}`;
+}
+
+function showTip(p) {
+    state.hover = p;
+    const [x, y] = p[state.proj];
+    focus.setAttribute('cx', x);
+    focus.setAttribute('cy', y);
+    focus.hidden = false;
+    const verdict = p.p >= 0.5 ? `${pct(p.p, 1)} droite` : `${pct(1 - p.p, 1)} gauche`;
+    tip.innerHTML =
+        `<strong>${esc(p.t)}</strong>` +
+        `<div class="row"><span class="sw" style="background: var(--${camp(p.y)})"></span>Étiquette : <b>${camp(p.y)}</b></div>` +
+        `<div class="row"><span class="sw" style="background: ${probaFill(p.p)}"></span>Modèle : <b>${verdict}</b>${p.err ? ' · erreur' : ''}</div>`;
+    tip.hidden = false;
+    // Position en pixels dans le cadre du graphique.
+    const sr = svg.getBoundingClientRect(), cr = chart.getBoundingClientRect();
+    const k = sr.width / W;
+    const px = sr.left - cr.left + x * k, py = sr.top - cr.top + y * k;
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let left = px + 14, top = py - th - 10;
+    if (left + tw > cr.width - 6) left = px - tw - 14;
+    if (left < 6) left = 6;
+    if (top < 6) top = py + 14;
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+}
+
+function hideTip() {
+    state.hover = null;
+    tip.hidden = true;
+    focus.hidden = true;
+}
+
+function nearest(evt) {
+    const pt = new DOMPoint(evt.clientX, evt.clientY).matrixTransform(svg.getScreenCTM().inverse());
+    const k = svg.getBoundingClientRect().width / W;
+    const searching = svg.classList.contains('searching');
+    let best = null, bestD = (16 / k) ** 2;
+    for (const p of pts) {
+        if (searching && !p.el.classList.contains('hit')) continue;
+        const [x, y] = p[state.proj];
+        const d = (x - pt.x) ** 2 + (y - pt.y) ** 2;
+        if (d < bestD) { bestD = d; best = p; }
+    }
+    return best;
+}
+
+svg.addEventListener('pointermove', (evt) => {
+    const p = nearest(evt);
+    if (p) showTip(p);
+    else if (!svg.classList.contains('searching')) hideTip();
+});
+svg.addEventListener('pointerleave', () => {
+    if (state.pinned) showTip(state.pinned);
+    else if (!svg.classList.contains('searching')) hideTip();
+});
+
+for (const b of document.querySelectorAll('[data-proj]')) {
+    b.addEventListener('click', () => {
+        state.proj = b.dataset.proj;
+        document.querySelectorAll('[data-proj]').forEach((o) => o.setAttribute('aria-pressed', o === b));
+        place();
+    });
+}
+for (const b of document.querySelectorAll('[data-color]')) {
+    b.addEventListener('click', () => {
+        state.color = b.dataset.color;
+        document.querySelectorAll('[data-color]').forEach((o) => o.setAttribute('aria-pressed', o === b));
+        paint();
+        if (state.hover) showTip(state.hover);
+    });
+}
+
+document.getElementById('q').addEventListener('input', (evt) => {
+    state.pinned = null;
+    const term = norm(evt.target.value);
+    const status = document.getElementById('search-status');
+    if (term.length < 2) {
+        svg.classList.remove('searching');
+        pts.forEach((p) => p.el.classList.remove('hit'));
+        status.textContent = '';
+        hideTip();
+        return;
+    }
+    const hits = pts.filter((p) => p.n.includes(term));
+    svg.classList.add('searching');
+    pts.forEach((p) => p.el.classList.toggle('hit', p.n.includes(term)));
+    status.textContent = hits.length
+        ? `${hits.length} exemple${hits.length > 1 ? 's' : ''} trouvé${hits.length > 1 ? 's' : ''}${hits.length > 1 ? ' · survolez les points en surbrillance' : ''}`
+        : 'Aucun exemple ne contient ce texte.';
+    hits.sort((a, b) => (a.n === term ? -1 : 0) - (b.n === term ? -1 : 0) || a.n.length - b.n.length);
+    if (hits.length) showTip(hits[0]);
+    else hideTip();
+});
+
+const worst = pts.filter((p) => p.err).sort((a, b) => Math.abs(b.p - 0.5) - Math.abs(a.p - 0.5)).slice(0, 20);
+document.getElementById('errors').innerHTML = worst.map((p) => {
+    const said = p.p >= 0.5 ? 1 : 0;
+    const conf = said ? p.p : 1 - p.p;
+    return `<tr><td>${esc(p.t)}</td>` +
+        `<td><span class="camp"><span class="sw" style="background: var(--${camp(p.y)})"></span>${camp(p.y)}</span></td>` +
+        `<td class="num"><span class="camp"><span class="sw" style="background: var(--${camp(said)})"></span>${pct(conf, 1)} ${camp(said)}</span></td></tr>`;
+}).join('');
+
+window.addEventListener('resize', () => { if (state.hover) showTip(state.hover); });
+
+// ---- Thèmes : étiquettes sur la carte et tableau ----
+const gLabels = document.getElementById('labels');
+const themes = [...DATA.themes];
+for (const th of themes) {
+    const [x, y] = tsneXY(th.cx, th.cy);
+    th.el = document.createElementNS(NS, 'text');
+    th.el.setAttribute('class', 'theme-label');
+    th.el.setAttribute('text-anchor', 'middle');
+    th.el.setAttribute('y', y + 5);
+    th.el.textContent = th.name;
+    gLabels.appendChild(th.el);
+    const w = th.el.getComputedTextLength() || th.name.length * 8;
+    const lx = Math.min(W - w / 2 - 10, Math.max(w / 2 + 10, x));
+    th.el.setAttribute('x', lx);
+    th.bg = document.createElementNS(NS, 'rect');
+    th.bg.setAttribute('class', 'theme-bg');
+    Object.entries({ x: lx - w / 2 - 6, y: y - 11, width: w + 12, height: 22, rx: 4 }).forEach(([k, v]) => th.bg.setAttribute(k, v));
+    gLabels.insertBefore(th.bg, th.el);
+}
+// Les largeurs dépendent de la police : on les remesure une fois les polices chargées.
+function fitLabels() {
+    for (const th of themes) {
+        const w = th.el.getComputedTextLength();
+        if (!w) continue;
+        const [x] = tsneXY(th.cx, th.cy);
+        const lx = Math.min(W - w / 2 - 10, Math.max(w / 2 + 10, x));
+        th.el.setAttribute('x', lx);
+        th.bg.setAttribute('x', lx - w / 2 - 6);
+        th.bg.setAttribute('width', w + 12);
+        th.box = { x0: lx - w / 2 - 6, x1: lx + w / 2 + 6, y: tsneXY(th.cx, th.cy)[1] };
+    }
+    // Deux étiquettes qui se chevauchent : on descend la plus basse.
+    const placed = [];
+    for (const th of [...themes].filter((t) => t.box).sort((a, b) => a.box.y - b.box.y)) {
+        while (placed.some((o) => o.box.x0 < th.box.x1 && th.box.x0 < o.box.x1 && Math.abs(o.box.y - th.box.y) < 24)) th.box.y += 6;
+        th.el.setAttribute('y', th.box.y + 5);
+        th.bg.setAttribute('y', th.box.y - 11);
+        placed.push(th);
+    }
+}
+fitLabels();
+document.fonts?.ready.then(fitLabels);
+state.themes = true;
+function showLabels() {
+    gLabels.style.display = state.themes && state.proj === 'tsne' ? '' : 'none';
+}
+document.getElementById('themes-toggle').addEventListener('click', (e) => {
+    state.themes = !state.themes;
+    e.currentTarget.setAttribute('aria-pressed', state.themes);
+    showLabels();
+});
+for (const b of document.querySelectorAll('[data-proj]')) b.addEventListener('click', showLabels);
+
+const bar = (v, color) => `<div class="bar-cell"><span class="v">${pct(v)}</span><div class="bar"><span style="width:${(v * 100).toFixed(1)}%;background:${color}"></span></div></div>`;
+const tbody = document.getElementById('themes');
+tbody.innerHTML = [...themes].sort((a, b) => b.err - a.err).map((th) =>
+    `<tr data-theme="${esc(th.name)}"><td>${esc(th.name)}</td><td class="num">${th.n}</td>` +
+    `<td>${bar(th.droite, 'var(--droite)')}</td><td>${bar(th.err, 'var(--ink)')}</td></tr>`).join('');
+function highlightTheme(name) {
+    svg.classList.toggle('theming', !!name);
+    for (const p of pts) p.el.classList.toggle('in-theme', p.th === name);
+    for (const th of themes) { th.el.classList.toggle('on', th.name === name); th.bg.classList.toggle('on', th.name === name); }
+}
+for (const tr of tbody.querySelectorAll('tr')) {
+    tr.addEventListener('pointerenter', () => highlightTheme(tr.dataset.theme));
+    tr.addEventListener('pointerleave', () => highlightTheme(null));
+}
+
+// ---- Visite guidée ----
+const byText = (t) => pts.find((p) => p.t === t);
+const TOUR = [
+    { label: '1. Les thèmes', proj: 'tsne', color: 'camp', themes: true,
+      note: 'Chaque zone de la carte est un thème. Regardez les couleurs : dans presque toutes les zones, le rouge et le bleu se mélangent.' },
+    { label: '2. La Rolex et ses voisins', proj: 'tsne', color: 'camp', themes: false, focus: 'la Rolex',
+      note: 'La Rolex est entourée de bleu : montres de luxe, Porsche, sac Louis Vuitton. Juste à côté, la friperie et Vinted sont en rouge. Sur ce thème, les vecteurs séparent bien les camps.' },
+    { label: '3. La loi anti-squat', proj: 'tsne', color: 'err', themes: false, focus: 'la loi anti-squat',
+      note: 'Étiquetée droite, mais le modèle répond gauche avec assurance. Son plus proche voisin est « le squat » : le vecteur encode le sujet, pas la position pour ou contre.' },
+    { label: '4. Où le modèle se trompe', proj: 'tsne', color: 'err', themes: true,
+      note: 'Les points colorés sont les erreurs. Elles sont nombreuses chez les personnalités, sur la fiscalité et l’immigration, plus rares sur les partis et la nourriture. Le tableau « Thème par thème » donne les chiffres.' },
+    { label: '5. Où il hésite', proj: 'tsne', color: 'proba', themes: true,
+      note: 'Bleu ou rouge franc : le modèle est sûr de lui. Gris : il hésite, autour de 50/50. Comparez avec l’onglet Étiquette pour repérer les erreurs commises avec assurance.' },
+];
+const tourEl = document.getElementById('tour');
+const tourNote = document.getElementById('tour-note');
+TOUR.forEach((step, k) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.id = 'tour-' + k;
+    b.textContent = step.label;
+    b.setAttribute('aria-pressed', 'false');
+    b.addEventListener('click', () => {
+        tourEl.querySelectorAll('button').forEach((o) => o.setAttribute('aria-pressed', o === b));
+        const q = document.getElementById('q');
+        if (q.value) { q.value = ''; q.dispatchEvent(new Event('input')); }
+        document.getElementById('proj-' + step.proj).click();
+        document.getElementById('color-' + step.color).click();
+        if (state.themes !== step.themes) document.getElementById('themes-toggle').click();
+        state.pinned = step.focus ? byText(step.focus) : null;
+        if (state.pinned) showTip(state.pinned); else hideTip();
+        tourNote.textContent = step.note;
+        tourNote.hidden = false;
+    });
+    tourEl.appendChild(b);
+});
+
+paint();
+place();
+showLabels();
+requestAnimationFrame(() => requestAnimationFrame(() => svg.classList.remove('still')));
+</script>

@@ -1,0 +1,28 @@
+<section id="qwen" data-transition="fade" style="background:#f2f3f7;color:#161820;font-family:'Public Sans', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:28px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#2748c9">Leçon n°3</p>
+<h2 style="font-family:'Big Shoulders Display', 'Arial Narrow', sans-serif;font-size:88px;font-weight:900;line-height:1;text-transform:uppercase">Du prompt engineering… pour un embedding</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:row;justify-content:space-between;gap:32px">
+<p style="font-size:24px;color:#5d6272">Texte envoyé à Qwen3</p>
+<p style="font-size:24px;color:#5d6272">Bonnes réponses</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:32px">
+<div style="flex:1;background:#fbfbfd;border:1px solid #d9dce5;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:32px">la raclette</p>
+</div>
+<p style="width:360px;white-space:nowrap;font-family:'Big Shoulders Display', 'Arial Narrow', sans-serif;font-size:120px;font-weight:900;line-height:1;text-align:right;color:#5d6272">~80 %</p>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:32px">
+<div style="flex:1;background:#fbfbfd;border:2px solid #2748c9;border-radius:16px;padding:32px">
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:32px">Les gens qui aiment la raclette <b>votent pour</b></p>
+</div>
+<p style="width:360px;white-space:nowrap;font-family:'Big Shoulders Display', 'Arial Narrow', sans-serif;font-size:120px;font-weight:900;line-height:1;text-align:right;color:#2748c9">~89 %</p>
+</div>
+</div>
+<p style="font-size:32px;line-height:1.4">Qwen3-Embedding vient d'un LLM : sa position sur la carte est calculée à partir du <b>dernier mot</b>. Finissez la phrase par « votent pour », et il anticipe probablement… un parti.</p>
+<p style="font-size:28px;line-height:1.4;color:#5d6272">Sur les modèles classiques, reformuler ne change rien (±1 point). Et Qwen3 pèse 614 Mo.</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5d6272;text-align:right">13 / 16</p>
+<aside>~30 s. Le résultat le plus drôle. Sur les modèles classiques, reformuler le texte ne sert à rien. Mais Qwen3 est construit à partir d'un LLM, et sa position sur la carte est calculée à partir du dernier mot. Si la phrase se termine par « votent pour », cette position prépare sans doute déjà le mot suivant : un parti. C'est mon hypothèse, je ne l'ai pas prouvée. On passe de 80 à 89 %. Seul problème : 614 Mo à télécharger.</aside>
+</section>
