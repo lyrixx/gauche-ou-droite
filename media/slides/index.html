@@ -268,68 +268,42 @@ x-shape[kind="ellipse"] { border-radius: 50%; }
 </div>
 <div style="display:flex;flex-direction:row;gap:64px">
 <div style="position:relative;width:1000px;height:600px;flex:none;background:#fbfbfd;border:1px solid #d9dce5;border-radius:16px;box-shadow:0px 8px 32px rgba(22,24,32,0.08);overflow:hidden">
-<svg aria-label="Un plan avec un axe x et un axe y gradués de -1 à 1. Quatre groupes de mots sur des halos colorés : animaux en haut à gauche (chat, chien, hamster), plats au fromage en haut à droite (raclette, fondue, tartiflette), petits véhicules en bas à gauche (vélo, trottinette, roller), musique en bas à droite (jazz, blues, rock). La pétanque, en bleu, est projetée en pointillés sur les deux axes : x = 0.10, y = 0.62." width="1000" height="600" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:0px;top:0px;width:1000px;height:600px">
-<defs><filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="10"/></filter></defs>
-<g filter="url(#soft)">
-<ellipse cx="282" cy="190" rx="118" ry="76" fill="#f3e3cc"/>
-<ellipse cx="758" cy="190" rx="118" ry="74" fill="#f5e8b8"/>
-<ellipse cx="278" cy="445" rx="112" ry="72" fill="#d3ecdf"/>
-<ellipse cx="758" cy="445" rx="112" ry="72" fill="#e3dbf4"/>
+<svg aria-label="Une carte imaginaire : une centaine de points regroupés par thème (animaux, bricolage, fruits, informatique, météo, musique, plats, sports, véhicules). Dans chaque groupe, il y a des points rouges (de gauche) et des points bleus (de droite)." width="1000" height="600" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg" style="position:absolute;left:0px;top:0px;width:1000px;height:600px">
+<defs><filter id="carte-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter></defs>
+<g filter="url(#carte-soft)">
+<ellipse cx="434" cy="111" rx="87" ry="87" fill="#f3e3cc"/>
+<ellipse cx="521" cy="315" rx="92" ry="92" fill="#e9dccb"/>
+<ellipse cx="189" cy="385" rx="82" ry="82" fill="#f2dcea"/>
+<ellipse cx="619" cy="510" rx="87" ry="87" fill="#d6eef2"/>
+<ellipse cx="441" cy="404" rx="101" ry="101" fill="#e6ebd0"/>
+<ellipse cx="801" cy="416" rx="82" ry="82" fill="#e3dbf4"/>
+<ellipse cx="261" cy="251" rx="84" ry="84" fill="#f5e8b8"/>
+<ellipse cx="790" cy="154" rx="77" ry="77" fill="#fbe0d2"/>
+<ellipse cx="654" cy="234" rx="110" ry="110" fill="#d3ecdf"/>
 </g>
-<g stroke="#eceef4" stroke-width="2">
-<line x1="300" y1="40" x2="300" y2="560"/><line x1="740" y1="40" x2="740" y2="560"/>
-<line x1="80" y1="170" x2="960" y2="170"/><line x1="80" y1="430" x2="960" y2="430"/>
+<g fill="#d7263d" stroke="#fbfbfd" stroke-width="3">
+<circle cx="402" cy="109" r="8"/><circle cx="419" cy="75" r="8"/><circle cx="407" cy="120" r="8"/><circle cx="406" cy="141" r="8"/><circle cx="434" cy="85" r="8"/><circle cx="432" cy="104" r="8"/><circle cx="462" cy="340" r="8"/><circle cx="487" cy="277" r="8"/><circle cx="493" cy="310" r="8"/><circle cx="517" cy="289" r="8"/><circle cx="533" cy="266" r="8"/><circle cx="508" cy="332" r="8"/><circle cx="169" cy="357" r="8"/><circle cx="163" cy="394" r="8"/><circle cx="171" cy="382" r="8"/><circle cx="185" cy="357" r="8"/><circle cx="196" cy="337" r="8"/><circle cx="170" cy="409" r="8"/><circle cx="528" cy="390" r="8"/><circle cx="587" cy="510" r="8"/><circle cx="607" cy="471" r="8"/><circle cx="604" cy="519" r="8"/><circle cx="619" cy="492" r="8"/><circle cx="619" cy="515" r="8"/><circle cx="385" cy="387" r="8"/><circle cx="391" cy="375" r="8"/><circle cx="394" cy="433" r="8"/><circle cx="440" cy="364" r="8"/><circle cx="429" cy="404" r="8"/><circle cx="423" cy="422" r="8"/><circle cx="557" cy="333" r="8"/><circle cx="764" cy="440" r="8"/><circle cx="801" cy="382" r="8"/><circle cx="795" cy="396" r="8"/><circle cx="810" cy="368" r="8"/><circle cx="783" cy="435" r="8"/><circle cx="224" cy="238" r="8"/><circle cx="244" cy="213" r="8"/><circle cx="238" cy="236" r="8"/><circle cx="240" cy="273" r="8"/><circle cx="259" cy="235" r="8"/><circle cx="274" cy="212" r="8"/><circle cx="382" cy="440" r="8"/><circle cx="432" cy="324" r="8"/><circle cx="755" cy="130" r="8"/><circle cx="769" cy="154" r="8"/><circle cx="781" cy="138" r="8"/><circle cx="426" cy="306" r="8"/><circle cx="609" cy="205" r="8"/><circle cx="621" cy="185" r="8"/><circle cx="627" cy="202" r="8"/><circle cx="639" cy="210" r="8"/><circle cx="655" cy="218" r="8"/>
 </g>
-<g stroke="#9a9fb0" stroke-width="3">
-<line x1="80" y1="300" x2="970" y2="300"/><line x1="520" y1="30" x2="520" y2="560"/>
-<line x1="80" y1="292" x2="80" y2="308"/><line x1="960" y1="292" x2="960" y2="308"/>
-<line x1="512" y1="40" x2="528" y2="40"/><line x1="512" y1="560" x2="528" y2="560"/>
+<g fill="#2748c9" stroke="#fbfbfd" stroke-width="3">
+<circle cx="422" cy="149" r="8"/><circle cx="451" cy="83" r="8"/><circle cx="434" cy="145" r="8"/><circle cx="453" cy="105" r="8"/><circle cx="448" cy="125" r="8"/><circle cx="463" cy="111" r="8"/><circle cx="531" cy="282" r="8"/><circle cx="524" cy="326" r="8"/><circle cx="533" cy="315" r="8"/><circle cx="546" cy="302" r="8"/><circle cx="521" cy="380" r="8"/><circle cx="503" cy="435" r="8"/><circle cx="185" cy="389" r="8"/><circle cx="204" cy="368" r="8"/><circle cx="189" cy="423" r="8"/><circle cx="213" cy="394" r="8"/><circle cx="217" cy="385" r="8"/><circle cx="228" cy="367" r="8"/><circle cx="620" cy="531" r="8"/><circle cx="615" cy="549" r="8"/><circle cx="637" cy="505" r="8"/><circle cx="638" cy="535" r="8"/><circle cx="656" cy="491" r="8"/><circle cx="659" cy="502" r="8"/><circle cx="441" cy="391" r="8"/><circle cx="459" cy="359" r="8"/><circle cx="466" cy="374" r="8"/><circle cx="449" cy="420" r="8"/><circle cx="445" cy="432" r="8"/><circle cx="519" cy="431" r="8"/><circle cx="793" cy="421" r="8"/><circle cx="818" cy="393" r="8"/><circle cx="810" cy="416" r="8"/><circle cx="801" cy="445" r="8"/><circle cx="837" cy="370" r="8"/><circle cx="822" cy="423" r="8"/><circle cx="253" cy="271" r="8"/><circle cx="261" cy="251" r="8"/><circle cx="274" cy="235" r="8"/><circle cx="286" cy="257" r="8"/><circle cx="275" cy="287" r="8"/><circle cx="323" cy="270" r="8"/><circle cx="794" cy="118" r="8"/><circle cx="793" cy="139" r="8"/><circle cx="790" cy="166" r="8"/><circle cx="800" cy="156" r="8"/><circle cx="815" cy="128" r="8"/><circle cx="805" cy="175" r="8"/><circle cx="661" cy="206" r="8"/><circle cx="652" cy="234" r="8"/><circle cx="654" cy="284" r="8"/><circle cx="667" cy="279" r="8"/><circle cx="674" cy="263" r="8"/><circle cx="674" cy="289" r="8"/>
 </g>
-<path d="M984 300 l-16 -9 v18 z" fill="#9a9fb0"/>
-<path d="M520 16 l-9 16 h18 z" fill="#9a9fb0"/>
-<g stroke="#2748c9" stroke-width="3" stroke-dasharray="7 7">
-<line x1="564" y1="139" x2="564" y2="300"/><line x1="564" y1="139" x2="520" y2="139"/>
+<g font-size="22" font-weight="700" fill="#5d6272" stroke="#fbfbfd" stroke-width="5" stroke-linejoin="round" paint-order="stroke">
+<text x="434" y="59" text-anchor="middle">Animaux</text>
+<text x="521" y="250" text-anchor="middle">Bricolage</text>
+<text x="189" y="321" text-anchor="middle">Fruits</text>
+<text x="619" y="455" text-anchor="middle">Informatique</text>
+<text x="441" y="473" text-anchor="middle">Météo</text>
+<text x="801" y="352" text-anchor="middle">Musique</text>
+<text x="261" y="196" text-anchor="middle">Plats</text>
+<text x="790" y="102" text-anchor="middle">Sports</text>
+<text x="654" y="169" text-anchor="middle">Véhicules</text>
 </g>
-<g stroke="#2748c9" stroke-width="3"><line x1="564" y1="292" x2="564" y2="308"/><line x1="512" y1="139" x2="528" y2="139"/></g>
-<g fill="#161820" stroke="#fbfbfd" stroke-width="3">
-<circle cx="230" cy="157" r="10"/><circle cx="335" cy="170" r="10"/><circle cx="265" cy="227" r="10"/>
-<circle cx="696" cy="149" r="10"/><circle cx="810" cy="186" r="10"/><circle cx="731" cy="232" r="10"/>
-<circle cx="247" cy="404" r="10"/><circle cx="344" cy="443" r="10"/><circle cx="230" cy="487" r="10"/>
-<circle cx="705" cy="409" r="10"/><circle cx="819" cy="435" r="10"/><circle cx="722" cy="487" r="10"/>
-</g>
-<circle cx="564" cy="139" r="28" fill="#2748c9" opacity="0.15"/>
-<circle cx="564" cy="139" r="12" fill="#2748c9" stroke="#fbfbfd" stroke-width="4"/>
+<g font-size="22" fill="#5d6272"><circle cx="34" cy="30" r="8" fill="#d7263d"/><text x="50" y="38">de gauche</text><circle cx="186" cy="30" r="8" fill="#2748c9"/><text x="202" y="38">de droite</text></g>
 </svg>
-<p style="position:absolute;left:84px;top:262px;width:100px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5d6272">-1.0</p>
-<p style="position:absolute;left:856px;top:262px;width:100px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5d6272;text-align:right">1.0</p>
-<p style="position:absolute;left:472px;top:262px;width:40px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5d6272;text-align:right">0</p>
-<p style="position:absolute;left:412px;top:24px;width:100px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5d6272;text-align:right">1.0</p>
-<p style="position:absolute;left:412px;top:543px;width:100px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5d6272;text-align:right">-1.0</p>
-<p style="position:absolute;left:529px;top:310px;width:70px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#2748c9;text-align:center">0.10</p>
-<p style="position:absolute;left:422px;top:122px;width:90px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;font-weight:700;color:#2748c9;text-align:right">0.62</p>
-<p style="position:absolute;left:374px;top:78px;width:380px;font-size:28px;font-weight:700;color:#2748c9;text-align:center">la pétanque</p>
-<p style="position:absolute;left:246px;top:137px;width:90px;font-size:28px;font-weight:600">chat</p>
-<p style="position:absolute;left:351px;top:150px;width:110px;font-size:28px;font-weight:600">chien</p>
-<p style="position:absolute;left:281px;top:207px;width:140px;font-size:28px;font-weight:600">hamster</p>
-<p style="position:absolute;left:712px;top:129px;width:150px;font-size:28px;font-weight:600">raclette</p>
-<p style="position:absolute;left:826px;top:166px;width:130px;font-size:28px;font-weight:600">fondue</p>
-<p style="position:absolute;left:747px;top:212px;width:200px;font-size:28px;font-weight:600">tartiflette</p>
-<p style="position:absolute;left:263px;top:384px;width:90px;font-size:28px;font-weight:600">vélo</p>
-<p style="position:absolute;left:360px;top:423px;width:200px;font-size:28px;font-weight:600">trottinette</p>
-<p style="position:absolute;left:246px;top:467px;width:120px;font-size:28px;font-weight:600">roller</p>
-<p style="position:absolute;left:721px;top:389px;width:90px;font-size:28px;font-weight:600">jazz</p>
-<p style="position:absolute;left:835px;top:415px;width:110px;font-size:28px;font-weight:600">blues</p>
-<p style="position:absolute;left:738px;top:467px;width:100px;font-size:28px;font-weight:600">rock</p>
 </div>
 <div style="flex:1;display:flex;flex-direction:column;gap:20px">
-<p style="font-size:32px;line-height:1.4">Un <b>embedding</b>, ce sont les coordonnées d'un texte sur cette carte.</p>
-<table style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:28px;color:#161820;background:#fbfbfd;border-radius:12px">
-<tr style="background:#e6e8ef"><th style="width:50%">texte</th><th style="width:25%;text-align:right">x</th><th style="width:25%;text-align:right">y</th></tr>
-<tr><td>chat</td><td style="text-align:right">-0.66</td><td style="text-align:right">0.55</td></tr>
-<tr><td>chien</td><td style="text-align:right">-0.42</td><td style="text-align:right">0.50</td></tr>
-<tr><td>raclette</td><td style="text-align:right">0.40</td><td style="text-align:right">0.58</td></tr>
-<tr style="background:#dfe5fb"><td style="color:#2748c9">la pétanque</td><td style="text-align:right;color:#2748c9">0.10</td><td style="text-align:right;color:#2748c9">0.62</td></tr>
-</table>
+<p style="font-size:32px;line-height:1.4">Un <b>embedding</b>, ce sont les coordonnées d'un texte sur une carte du sens.</p>
+<p style="font-size:32px;line-height:1.4">Chaque point est un texte. Ceux qui parlent de la même chose se retrouvent ensemble. <b>Sens proches, positions proches.</b></p>
 <div style="display:flex;flex-direction:column;gap:8px;background:#161820;border-radius:12px;padding:20px">
 <p style="font-size:24px;color:#9a9fb0">« la pétanque », pour de vrai : <span style="color:#6d8bff">768 nombres</span></p>
 <svg aria-label="Les 768 valeurs réelles du vecteur de la pétanque, dessinées comme une forme d'onde : chaque trait vertical est une valeur, vers le haut si elle est positive, vers le bas si elle est négative." width="540" height="80" viewBox="0 0 540 80" xmlns="http://www.w3.org/2000/svg" style="width:540px;height:80px">
@@ -342,7 +316,7 @@ x-shape[kind="ellipse"] { border-radius: 50%; }
 </div>
 <p style="position:absolute;left:128px;bottom:64px;width:1440px;font-size:24px;color:#5d6272">Tout un talk là-dessus : « Embeddings : Symfony AI en pratique », AFUP Day 2026 · speakerdeck.com/lyrixx</p>
 <p style="position:absolute;right:128px;bottom:64px;width:200px;font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#5d6272;text-align:right">8 / 16</p>
-<aside>~45 s. Un embedding, c'est littéralement des coordonnées. Ici je dessine un plan en 2 dimensions : chat est en (-0.66, 0.55), chien juste à côté en (-0.42, 0.50), raclette de l'autre côté en (0.40, 0.58). Sens proches, coordonnées proches. Le modèle a appris ça sur des milliards de phrases : « chat » et « chien » apparaissent dans les mêmes contextes. La pétanque, en bleu : on lit ses coordonnées sur les axes, 0.10 et 0.62. En vrai, il n'y a pas 2 coordonnées mais 768 : dans le cadre noir, chaque petit trait est une des 768 vraies valeurs de « la pétanque », calculées par EmbeddingGemma. Le plan en 2D, lui, est un dessin pour l'exemple. Et ce modèle ne sait rien de gauche ou de droite : il sait juste ce qui se ressemble. J'ai fait tout un talk là-dessus à l'AFUP Day 2026, « Embeddings : Symfony AI en pratique » : je ne refais pas tout, le lien est en bas. (Si question, vraies similarités cosinus calculées avec le modèle : chat/chien 0,87 ; chat/raclette 0,80 ; raclette/fondue 0,89.)</aside>
+<aside>~45 s. Un embedding, c'est littéralement des coordonnées. Chaque point de cette carte est un texte, placé par le modèle. Ce qui parle de la même chose se retrouve au même endroit : les animaux ensemble, les plats ensemble, la musique ensemble. Sens proches, coordonnées proches. Le modèle a appris ça sur des milliards de phrases : « chat » et « chien » apparaissent dans les mêmes contextes. Les couleurs, c'est le camp de chaque exemple : dans chaque thème, on trouve du rouge et du bleu. Le modèle range par sujet, pas par camp ; le camp, ce sera le travail de la brique 2. En vrai, il n'y a pas 2 coordonnées mais 768 : dans le cadre noir, chaque petit trait est une des 768 vraies valeurs de « la pétanque », calculées par EmbeddingGemma. Et ce modèle ne sait rien de gauche ou de droite : il sait juste ce qui se ressemble. J'ai fait tout un talk là-dessus à l'AFUP Day 2026, « Embeddings : Symfony AI en pratique » : je ne refais pas tout, le lien est en bas. (La carte est un dessin pour l'exemple. Si question, vraies similarités cosinus calculées avec le modèle : chat/chien 0,87 ; chat/raclette 0,80 ; raclette/fondue 0,89. La vraie carte des exemples : lyrixx.github.io/gauche-ou-droite/media/nuage.)</aside>
 </section>
 <section id="regression" data-transition="fade" style="background:#f2f3f7;color:#161820;font-family:'Public Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
 <div style="position:absolute;left:128px;top:320px;width:880px;height:600px;background:#fbfbfd;border:1px solid #d9dce5;border-radius:16px;box-shadow:0px 8px 32px rgba(22,24,32,0.08)"></div>
