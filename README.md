@@ -26,7 +26,7 @@ castor build                       # install + train, c'est ce que lance la CI
 castor media:build                 # régénère les pages de media/ (voir tools/README.md)
 ```
 
-**Améliorer les réponses.** Ajoutez ou corrigez des lignes dans [`data/exemples.csv`](data/exemples.csv), relancez `castor train`, rechargez la page.
+**Améliorer les réponses.** Ajoutez ou corrigez des lignes dans [`data/exemples.csv`](data/exemples.csv), relancez `castor train`, rechargez la page. Un « anti-X » classé dans le camp de X (« antiwoke » à gauche) va plutôt dans [`data/exceptions.csv`](data/exceptions.csv) (voir [Les exceptions](#les-exceptions)).
 
 **Déploiement.** Chaque push sur `main` lance [la CI](.github/workflows/deploy.yml). Elle réentraîne le classifieur avec `castor build` et publie le dossier `site/` sur GitHub Pages, avec les pages de `media/` sous [`/media/`](https://lyrixx.github.io/gauche-ou-droite/media/).
 
@@ -114,6 +114,14 @@ La normalisation (`normalize()` dans [`site/classifier.js`](site/classifier.js))
 
 Cette normalisation ne sert **qu'à la table**. Le modèle, lui, reçoit le texte brut. Il a appris le français avec ses accents, et lui enlever les accents dégraderait ses vecteurs. C'est pour ça que « développeur » et « developpeur » peuvent recevoir des scores différents quand le mot n'est pas dans les exemples.
 
+#### Les exceptions
+
+Le modèle d'embeddings code le sujet d'un texte, pas la position qu'il prend sur ce sujet. « L'antiwokisme » est donc tout près du « wokisme », et sortait de gauche à 100 %. Même chose pour « anti-IVG », « anticommuniste » ou « anticlérical », chacun rangé dans le camp qu'il combat. « L'homophobie » sortait aussi de gauche à 99 %, et « le racisme » à 96 %.
+
+Pour la haine et les discriminations (racisme, homophobie, transphobie, ségrégation…), des exemples étiquetés « droite » suffisent. Le modèle généralise : « les homophobes », jamais vu, sort de droite à 98 %. Il faut parfois ajouter l'exemple contraire : sans « l'homosexualité » et « la Pride » à gauche, l'homophobie les entraînait à droite.
+
+Pour les « anti-X », ça ne marche pas. Le modèle ne parvient pas à les séparer de X, donc il ne les apprend pas, et il entraîne X avec eux : « le wokisme » tombait à 50 %, et la précision perdait un point et demi. Ces textes vont donc dans [`data/exceptions.csv`](data/exceptions.csv). Ils entrent dans la table de correspondance, mais pas dans l'entraînement. Un texte ne peut pas être dans les deux fichiers. Conséquence : une variante absente de la table (« les anti-féministes » avec un trait d'union) reste mal classée.
+
 ### De la V1 à la V2 : le banc d'essai
 
 La V1 plafonnait autour de 69-70 %. Avant de sortir l'artillerie lourde, on a cherché ce qui compte vraiment. Le banc d'essai :
@@ -184,6 +192,7 @@ La V2 garde exactement la même architecture, avec un nouveau modèle et quelque
 
 ```
 data/exemples.csv          les exemples étiquetés : c'est ici qu'on améliore les réponses
+data/exceptions.csv        les textes que le modèle ne doit pas apprendre (les « anti-X »), table seule
 scripts/train.mjs          entraînement + validation croisée → site/classifier.json
 scripts/predict.mjs        prédictions depuis le terminal
 site/                      le site statique publié sur GitHub Pages

@@ -6,6 +6,8 @@
 // 3. Mesure la précision en validation croisée (sur des exemples jamais vus).
 // 4. Sauvegarde les poids, et la liste des exemples pour y répondre directement,
 //    dans un JSON que le site charge.
+//
+// Les textes de data/exceptions.csv vont dans cette liste, mais pas dans l'entraînement.
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import * as transformers from '@huggingface/transformers';
@@ -20,17 +22,27 @@ const EPOCHS = 2000;
 const LEARNING_RATE = 0.5;
 const FOLDS = 5;
 
-const examples = readFileSync(new URL('../data/exemples.csv', import.meta.url), 'utf8')
-    .trim()
-    .split('\n')
-    .slice(1)
-    .filter((line) => line.trim() !== '')
-    .map((line) => {
-        const [camp, ...rest] = line.split(';');
-        return { text: rest.join(';').trim(), y: camp.trim() === 'droite' ? 1 : 0 };
-    });
+const readCsv = (file) =>
+    readFileSync(new URL(`../data/${file}`, import.meta.url), 'utf8')
+        .trim()
+        .split('\n')
+        .slice(1)
+        .filter((line) => line.trim() !== '')
+        .map((line) => {
+            const [camp, ...rest] = line.split(';');
+            return { text: rest.join(';').trim(), y: camp.trim() === 'droite' ? 1 : 0 };
+        });
 
-console.log(`${examples.length} exemples (${examples.filter((e) => e.y === 0).length} gauche, ${examples.filter((e) => e.y === 1).length} droite)`);
+const examples = readCsv('exemples.csv');
+const exceptions = readCsv('exceptions.csv');
+
+const exampleKeys = new Set(examples.map((e) => normalize(e.text)));
+const duplicates = exceptions.filter((e) => exampleKeys.has(normalize(e.text)));
+if (duplicates.length) {
+    throw new Error(`Ces textes sont à la fois dans exemples.csv et exceptions.csv : ${duplicates.map((e) => `"${e.text}"`).join(', ')}.`);
+}
+
+console.log(`${examples.length} exemples (${examples.filter((e) => e.y === 0).length} gauche, ${examples.filter((e) => e.y === 1).length} droite), ${exceptions.length} exceptions`);
 
 console.log(`Chargement de ${EMBEDDING_MODEL}...`);
 const embed = await createEmbedder(transformers);
@@ -112,7 +124,7 @@ writeFileSync(
         std: round(model.std),
         weights: round(model.weights),
         bias: model.bias,
-        lookup: Object.fromEntries(examples.map((e) => [normalize(e.text), e.y])),
+        lookup: Object.fromEntries([...examples, ...exceptions].map((e) => [normalize(e.text), e.y])),
     }),
 );
 console.log('\nsite/classifier.json écrit.');

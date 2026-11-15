@@ -1,6 +1,7 @@
 camp;texte
 droite;Alain Delon
 droite;Alain Finkielkraut
+droite;antisémite
 droite;Bernard Arnault
 droite;Béziers
 droite;BFM Business
@@ -19,6 +20,7 @@ droite;Choose France
 droite;Christian Clavier
 droite;Christine Boutin
 droite;CNews
+droite;colonialiste
 droite;Cyril Hanouna
 droite;Deauville
 droite;Donald Trump
@@ -40,6 +42,7 @@ droite;Giorgia Meloni
 droite;Gstaad
 droite;HEC
 droite;Hénin-Beaumont
+droite;homophobe
 droite;identitaire
 droite;Jacques Chirac
 droite;Jair Bolsonaro
@@ -55,6 +58,8 @@ droite;l'Action française
 droite;l'agent immobilier
 droite;l'agriculture intensive
 droite;l'agriculture productiviste
+droite;l'antisémitisme
+droite;l'apartheid
 droite;l'Arabie saoudite
 droite;l'aristocratie
 droite;l'armagnac
@@ -89,6 +94,7 @@ droite;l'hélicoptère
 droite;l'héritage
 droite;l'héritier
 droite;l'homme au foyer qui ramène l'argent
+droite;l'homophobie
 droite;l'identité nationale
 droite;l'immigration zéro
 droite;L'Incorrect
@@ -166,11 +172,14 @@ droite;la France éternelle
 droite;la France profonde
 droite;la fraude sociale
 droite;la gendarmerie
+droite;la haine des homosexuels
 droite;la Harley-Davidson
 droite;la hiérarchie
 droite;la Légion d'honneur
 droite;la Légion étrangère
 droite;la légitime défense
+droite;la lesbophobie
+droite;la LGBTphobie
 droite;la liberté d'entreprendre
 droite;la liberté de rouler
 droite;la loi anti-squat
@@ -211,6 +220,7 @@ droite;la rigueur
 droite;la Rolex
 droite;la ruralité
 droite;la sécurité
+droite;la ségrégation raciale
 droite;la sélection à l'université
 droite;la Silicon Valley libertarienne
 droite;la souveraineté nationale
@@ -222,6 +232,7 @@ droite;la tenue correcte exigée
 droite;la tolérance zéro
 droite;la tradition
 droite;la tradition du sapin et de la crèche
+droite;la transphobie
 droite;la truffe
 droite;la valeur travail
 droite;la Vendée
@@ -304,6 +315,7 @@ droite;le jet privé
 droite;le jet-ski
 droite;le Jockey Club
 droite;le Kärcher
+droite;le Ku Klux Klan
 droite;le laxisme judiciaire
 droite;le libéralisme
 droite;le libertarianisme
@@ -352,6 +364,7 @@ droite;le Puy du Fou
 droite;le Qatar
 droite;le quad
 droite;le racisme
+droite;le racisme anti-blancs
 droite;le RAID
 droite;le rallye mondain
 droite;le Range Rover
@@ -446,6 +459,7 @@ droite;les valeurs chrétiennes
 droite;les valeurs familiales
 droite;les vieilles familles françaises
 droite;les voitures de collection
+droite;lesbophobe
 droite;Louis-Ferdinand Céline
 droite;LR
 droite;Margaret Thatcher
@@ -458,6 +472,7 @@ droite;Mussolini
 droite;Napoléon
 droite;nationaliste
 droite;nazi
+droite;négationniste
 droite;néonazi
 droite;Neuilly-sur-Seine
 droite;Nice
@@ -478,14 +493,17 @@ droite;Saint-Cloud
 droite;Saint-Germain-en-Laye
 droite;Saint-Tropez
 droite;Sarko
+droite;ségrégationniste
 droite;Singapour
 droite;skinhead
 droite;souverainiste
 droite;Stanislas
 droite;Stéphane Bern
 droite;Sud Radio
+droite;suprémaciste
 droite;TotalEnergies
 droite;Toulon
+droite;transphobe
 droite;travailler plus pour gagner plus
 droite;Truth Social
 droite;un député RN
@@ -508,6 +526,7 @@ droite;Vincent Bolloré
 droite;Wall Street
 droite;xénophobe
 droite;Zemmour
+gauche;Action directe
 gauche;Agnès Varda
 gauche;Alexandria Ocasio-Cortez
 gauche;Ambroise Croizat
@@ -607,6 +626,7 @@ gauche;l'escalade
 gauche;l'État-providence
 gauche;l'Europe sociale
 gauche;l'extrême gauche
+gauche;l'homosexualité
 gauche;l'hôpital public
 gauche;L'Humanité
 gauche;l'impôt progressif
@@ -646,6 +666,7 @@ gauche;la décroissance
 gauche;la défense du service public
 gauche;la démocratie participative
 gauche;la désobéissance civile
+gauche;la dictature du prolétariat
 gauche;la diversité
 gauche;la faucille et le marteau
 gauche;la fête de l'Huma
@@ -683,6 +704,7 @@ gauche;la Place de la République
 gauche;la PMA
 gauche;la PMA pour toutes
 gauche;la poterie
+gauche;la Pride
 gauche;la protection du loup
 gauche;la Quadrature du Net
 gauche;la redistribution
@@ -814,6 +836,7 @@ gauche;le SMIC
 gauche;le socialisme
 gauche;le sociologue
 gauche;le squat
+gauche;le stalinisme
 gauche;le steak végétal
 gauche;le t-shirt Che Guevara
 gauche;Le Temps des cerises
@@ -943,6 +966,7 @@ gauche;Rennes
 gauche;Reporterre
 gauche;révolutionnaire
 gauche;Robert Guédiguian
+gauche;Robespierre
 gauche;Rosa Luxemburg
 gauche;Saint-Denis
 gauche;Sandrine Rousseau
@@ -951,6 +975,7 @@ gauche;Simone de Beauvoir
 gauche;socialiste
 gauche;SOS Méditerranée
 gauche;SOS Racisme
+gauche;stalinien
 gauche;taxer les riches
 gauche;Télérama
 gauche;Thomas Piketty
